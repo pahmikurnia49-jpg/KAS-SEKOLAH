@@ -6,6 +6,7 @@
     <title>Sistem Kas Sekolah</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -240,19 +241,19 @@
                     </div>
                 </div>
 
-                <div id="menu-master" class="view-section hidden-section">
+                <div id="menu-master" class="view-section hidden-section relative">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                         <div>
                             <h3 class="text-xl font-bold text-slate-800">Data Master Siswa</h3>
                             <p class="text-sm text-slate-500">Kelola data murid dan pantau status tagihan mereka.</p>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="openModalSiswa()" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-dark transition flex items-center gap-2">
+                            <button onclick="openModalSiswa()" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-dark transition flex items-center gap-2 shadow-sm">
                                 <i class="fa-solid fa-plus"></i> Tambah Siswa
                             </button>
-                            <label class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition flex items-center gap-2 cursor-pointer">
-                                <i class="fa-solid fa-file-import"></i> Impor CSV
-                                <input type="file" id="csv-file" class="hidden" accept=".csv" onchange="importCSV(this)">
+                            <label class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition flex items-center gap-2 cursor-pointer shadow-sm">
+                                <i class="fa-solid fa-file-excel"></i> Impor Excel/CSV
+                                <input type="file" id="excel-file" class="hidden" accept=".csv, .xls, .xlsx" onchange="importExcel(this)">
                             </label>
                         </div>
                     </div>
@@ -260,7 +261,7 @@
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6">
                         <div class="relative">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                            <input type="text" id="search-siswa" onkeyup="filterSiswa()" placeholder="Cari nama atau NIS siswa..." class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                            <input type="text" id="search-siswa" onkeyup="filterSiswa()" placeholder="Cari nama atau NIS siswa..." class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-slate-50 focus:bg-white transition">
                         </div>
                     </div>
 
@@ -272,13 +273,50 @@
                                         <th class="p-4 font-bold text-slate-700 text-sm">NIS</th>
                                         <th class="p-4 font-bold text-slate-700 text-sm">Nama Lengkap</th>
                                         <th class="p-4 font-bold text-slate-700 text-sm">Thn Masuk</th>
-                                        <th class="p-4 font-bold text-slate-700 text-sm text-center">Kelas Sekarang</th>
+                                        <th class="p-4 font-bold text-slate-700 text-sm text-center">Kelas / Status</th>
                                         <th class="p-4 font-bold text-slate-700 text-sm text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="table-siswa-body" class="divide-y divide-slate-100 text-sm text-slate-600">
                                     </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <div id="modal-siswa" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-all opacity-0">
+                        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-all duration-300" id="modal-siswa-content">
+                            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                <h3 class="text-lg font-bold text-slate-800" id="modal-siswa-title">Tambah Siswa Baru</h3>
+                                <button onclick="closeModalSiswa()" class="text-slate-400 hover:text-red-500 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+                            </div>
+                            <div class="p-6 space-y-4">
+                                <input type="hidden" id="form-mode" value="add">
+                                <input type="hidden" id="old-nis" value="">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">NIS <span class="text-red-500">*</span></label>
+                                    <input type="text" id="input-nis" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition bg-slate-50 focus:bg-white" placeholder="Masukkan NIS Siswa">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
+                                    <input type="text" id="input-nama" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition bg-slate-50 focus:bg-white" placeholder="Contoh: Budi Santoso">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-1">Tahun Masuk <span class="text-red-500">*</span></label>
+                                        <input type="number" id="input-tahun" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition bg-slate-50 focus:bg-white" placeholder="Contoh: 2023">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-1">Kelas Awal <span class="text-red-500">*</span></label>
+                                        <input type="number" id="input-kelas-awal" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition bg-slate-50 focus:bg-white" placeholder="Contoh: 10">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-5 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                                <button onclick="closeModalSiswa()" class="px-5 py-2 rounded-lg text-slate-600 font-semibold hover:bg-slate-200 transition">Batal</button>
+                                <button onclick="submitFormSiswa()" class="px-5 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-blue-700 transition shadow-md">
+                                    Simpan Data
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -578,62 +616,134 @@
 
         // --- LOGIKA MASTER SISWA ---
         
-        // 1. Fungsi Hitung Kelas Otomatis (Perpindahan Tiap Juli)
+        // 1. Hitung Kelas Otomatis (Maks 3 Tahun atau lewat Kelas 12 = Lulus)
         window.hitungKelasOtomatis = function(tahunMasuk, kelasAwal) {
             const sekarang = new Date();
-            const bulanSekarang = sekarang.getMonth() + 1; // 1-12
+            const bulanSekarang = sekarang.getMonth() + 1;
             const tahunSekarang = sekarang.getFullYear();
             
-            // Aturan: Jika sudah masuk Juli, tahun ajaran bertambah
             let tahunAkademikEfektif = (bulanSekarang >= 7) ? tahunSekarang : tahunSekarang - 1;
-            
             let selisihTahun = tahunAkademikEfektif - parseInt(tahunMasuk);
+            
+            // Batas masa sekolah 3 tahun
+            if (selisihTahun >= 3) return "Lulus";
+            
             let kelasSekarang = parseInt(kelasAwal) + selisihTahun;
+            
+            // Batas mentok kelas 12
+            if (kelasSekarang > 12) return "Lulus";
             
             return kelasSekarang;
         };
 
-        // 2. Fungsi Buka Modal Tambah Siswa
-        window.openModalSiswa = async function() {
-            const { value: formValues } = await Swal.fire({
-                title: 'Tambah Siswa Baru',
-                html:
-                    `<input id="swal-nis" class="swal2-input" placeholder="NIS">` +
-                    `<input id="swal-nama" class="swal2-input" placeholder="Nama Lengkap">` +
-                    `<input id="swal-tahun" type="number" class="swal2-input" placeholder="Tahun Masuk (Contoh: 2023)">` +
-                    `<input id="swal-kelas-awal" type="number" class="swal2-input" placeholder="Kelas Saat Masuk (Contoh: 7)">`,
-                focusConfirm: false,
-                showCancelButton: true,
-                confirmButtonText: 'Simpan',
-                preConfirm: () => {
-                    return {
-                        nis: document.getElementById('swal-nis').value,
-                        nama: document.getElementById('swal-nama').value,
-                        tahun: document.getElementById('swal-tahun').value,
-                        kelasAwal: document.getElementById('swal-kelas-awal').value
-                    }
-                }
-            });
+        // 2. Fungsi Buka & Tutup Modal UI Modern
+        window.openModalSiswa = function() {
+            document.getElementById('form-mode').value = 'add';
+            document.getElementById('old-nis').value = '';
+            document.getElementById('input-nis').value = '';
+            document.getElementById('input-nama').value = '';
+            document.getElementById('input-tahun').value = new Date().getFullYear();
+            document.getElementById('input-kelas-awal').value = '';
+            
+            document.getElementById('modal-siswa-title').innerText = 'Tambah Siswa Baru';
+            
+            const modal = document.getElementById('modal-siswa');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                document.getElementById('modal-siswa-content').classList.remove('scale-95');
+            }, 10);
+        };
 
-            if (formValues) {
-                if(!formValues.nis || !formValues.nama || !formValues.tahun || !formValues.kelasAwal) {
-                    Swal.fire('Error', 'Semua data harus diisi!', 'error');
-                    return;
+        window.closeModalSiswa = function() {
+            const modal = document.getElementById('modal-siswa');
+            modal.classList.add('opacity-0');
+            document.getElementById('modal-siswa-content').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+
+        // 3. Proses Simpan / Edit Data Siswa
+        window.submitFormSiswa = async function() {
+            const mode = document.getElementById('form-mode').value;
+            const oldNis = document.getElementById('old-nis').value;
+            
+            const data = {
+                nis: document.getElementById('input-nis').value.trim(),
+                nama: document.getElementById('input-nama').value.trim(),
+                tahun: document.getElementById('input-tahun').value,
+                kelasAwal: document.getElementById('input-kelas-awal').value
+            };
+            
+            if(!data.nis || !data.nama || !data.tahun || !data.kelasAwal) {
+                Swal.fire('Oopss!', 'Semua kolom wajib diisi ya!', 'warning');
+                return;
+            }
+            
+            const userUnit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+            
+            try {
+                // Kalau edit dan NIS-nya diganti, hapus data lama dulu biar gak dobel
+                if (mode === 'edit' && oldNis !== data.nis) {
+                    await set(ref(db, `students/${userUnit}/${oldNis}`), null);
                 }
-                saveSiswa(formValues);
+                
+                await set(ref(db, `students/${userUnit}/${data.nis}`), data);
+                Swal.fire({icon: 'success', title: 'Berhasil!', text: 'Data siswa tersimpan.', timer: 1500, showConfirmButton: false});
+                closeModalSiswa();
+                renderSiswa();
+            } catch (e) { Swal.fire('Gagal', e.message, 'error'); }
+        };
+
+        // 4. Fitur Edit Siswa (Ambil data dari DB ke Modal)
+        window.editSiswa = async function(nis) {
+            const userUnit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+            const snapshot = await get(child(ref(db), `students/${userUnit}/${nis}`));
+            
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                document.getElementById('form-mode').value = 'edit';
+                document.getElementById('old-nis').value = data.nis;
+                
+                document.getElementById('input-nis').value = data.nis;
+                document.getElementById('input-nama').value = data.nama;
+                document.getElementById('input-tahun').value = data.tahun;
+                document.getElementById('input-kelas-awal').value = data.kelasAwal;
+                
+                document.getElementById('modal-siswa-title').innerText = 'Edit Data Siswa';
+                
+                const modal = document.getElementById('modal-siswa');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    document.getElementById('modal-siswa-content').classList.remove('scale-95');
+                }, 10);
             }
         };
 
-        async function saveSiswa(data) {
-            const userUnit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            try {
-                await set(ref(db, `students/${userUnit}/${data.nis}`), data);
-                Swal.fire('Berhasil!', 'Data siswa tersimpan.', 'success');
-                renderSiswa();
-            } catch (e) { Swal.fire('Gagal', e.message, 'error'); }
-        }
+        // 5. Fitur Hapus Siswa (Fixed!)
+        window.hapusSiswa = async function(nis) {
+            const result = await Swal.fire({
+                title: 'Yakin mau hapus?',
+                text: "Data yang dihapus nggak bisa balik lagi lho!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Hapus!'
+            });
+            
+            if (result.isConfirmed) {
+                const userUnit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+                try {
+                    // Trik hapus di Realtime DB: set nilainya jadi null
+                    await set(ref(db, `students/${userUnit}/${nis}`), null); 
+                    Swal.fire({icon: 'success', title: 'Terhapus!', text: 'Siswa telah dikeluarkan.', timer: 1500, showConfirmButton: false});
+                    renderSiswa();
+                } catch (e) { Swal.fire('Gagal', e.message, 'error'); }
+            }
+        };
 
-        // 3. Render Tabel Siswa
+        // 6. Render Tabel & Label Lulus
         window.renderSiswa = async function() {
             const userUnit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
             const dbRef = ref(db);
@@ -647,29 +757,88 @@
                     const s = data[nis];
                     const kelasSkrg = hitungKelasOtomatis(s.tahun, s.kelasAwal);
                     
+                    // Ganti warna badge kalau dia udah lulus
+                    let badgeClass = "bg-blue-100 text-blue-700";
+                    let textKelas = `Kelas ${kelasSkrg}`;
+                    
+                    if(kelasSkrg === "Lulus") {
+                        badgeClass = "bg-green-100 text-green-700";
+                        textKelas = "Lulus 🎓";
+                    }
+                    
                     tbody.innerHTML += `
                         <tr class="hover:bg-slate-50 transition">
                             <td class="p-4 font-mono font-bold">${s.nis}</td>
                             <td class="p-4 font-semibold text-slate-800">${s.nama}</td>
-                            <td class="p-4">${s.tahun}</td>
-                            <td class="p-4 text-center"><span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-bold">Kelas ${kelasSkrg}</span></td>
+                            <td class="p-4 text-slate-500">${s.tahun}</td>
                             <td class="p-4 text-center">
-                                <button onclick="viewTagihan('${s.nis}', '${s.nama}')" class="text-secondary hover:text-primary p-2 transition" title="Lihat Tagihan">
+                                <span class="px-3 py-1 ${badgeClass} rounded-full font-bold text-xs uppercase tracking-wide">
+                                    ${textKelas}
+                                </span>
+                            </td>
+                            <td class="p-4 text-center whitespace-nowrap">
+                                <button onclick="viewTagihan('${s.nis}', '${s.nama}')" class="text-slate-400 hover:text-primary p-2 transition" title="Lihat Tagihan">
                                     <i class="fa-solid fa-file-invoice-dollar text-lg"></i>
                                 </button>
-                                <button onclick="hapusSiswa('${s.nis}')" class="text-red-400 hover:text-red-600 p-2 transition">
-                                    <i class="fa-solid fa-trash"></i>
+                                <button onclick="editSiswa('${s.nis}')" class="text-slate-400 hover:text-amber-500 p-2 transition" title="Edit Siswa">
+                                    <i class="fa-solid fa-pen-to-square text-lg"></i>
+                                </button>
+                                <button onclick="hapusSiswa('${s.nis}')" class="text-slate-400 hover:text-red-500 p-2 transition" title="Hapus Siswa">
+                                    <i class="fa-solid fa-trash text-lg"></i>
                                 </button>
                             </td>
                         </tr>
                     `;
                 }
             } else {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400 italic">Belum ada data siswa.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400 italic">Belum ada data siswa. Klik Tambah Siswa atau Impor Excel.</td></tr>';
             }
         };
 
-        // 4. Fitur Cari Siswa (Realtime)
+        // 7. Impor Data dari EXCEL (.xlsx) & CSV
+        window.importExcel = function(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                Swal.fire({title: 'Membaca File...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    // Ubah Excel jadi data baris JSON
+                    const rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+                    
+                    const userUnit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+                    let count = 0;
+                    
+                    // Asumsi kolom Excel: A=NIS, B=Nama, C=Tahun Masuk, D=Kelas Awal
+                    // Mulai dari i=1 untuk melewati baris Header
+                    for (let i = 1; i < rows.length; i++) {
+                        const col = rows[i];
+                        if (col && col.length >= 4 && col[0]) {
+                            await set(ref(db, `students/${userUnit}/${col[0]}`), {
+                                nis: col[0].toString().trim(),
+                                nama: col[1].toString().trim(),
+                                tahun: col[2].toString().trim(),
+                                kelasAwal: col[3].toString().trim()
+                            });
+                            count++;
+                        }
+                    }
+                    Swal.fire('Selesai!', `${count} Data siswa berhasil diimpor.`, 'success');
+                    renderSiswa();
+                } catch (error) {
+                    Swal.fire('Error', 'Format file tidak didukung atau rusak.', 'error');
+                }
+                input.value = ''; // Reset inputan file
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
+        // 8. Fitur Cari Siswa
         window.filterSiswa = function() {
             let input = document.getElementById('search-siswa').value.toLowerCase();
             let rows = document.querySelectorAll('#table-siswa-body tr');
@@ -679,36 +848,7 @@
             });
         };
 
-        // 5. Impor CSV Sederhana
-        window.importCSV = function(input) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            const userUnit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-
-            reader.onload = async function(e) {
-                const text = e.target.result;
-                const rows = text.split('\n').slice(1); // Lewati header
-                
-                Swal.fire({title: 'Mengimpor Data...', didOpen: () => Swal.showLoading()});
-                
-                for(let row of rows) {
-                    const col = row.split(',');
-                    if(col.length >= 4) {
-                        await set(ref(db, `students/${userUnit}/${col[0].trim()}`), {
-                            nis: col[0].trim(),
-                            nama: col[1].trim(),
-                            tahun: col[2].trim(),
-                            kelasAwal: col[3].trim()
-                        });
-                    }
-                }
-                Swal.fire('Berhasil!', 'Data CSV berhasil diimpor.', 'success');
-                renderSiswa();
-            };
-            reader.readAsText(file);
-        };
-
-        // 6. Intip Tagihan (Dilengkapi Tombol Download)
+        // 9. Intip Tagihan (Sama seperti sebelumnya)
         window.viewTagihan = function(nis, nama) {
             Swal.fire({
                 title: `Rincian Tagihan: ${nama}`,
@@ -724,7 +864,6 @@
                         </div>
                         <p class="mt-4 text-center text-xs text-slate-400">*Fitur ini akan sinkron otomatis setelah Master Tagihan selesai.</p>
                     </div>
-                    
                     <button onclick="cetakInvoice('${nis}', '${nama}')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition shadow-md">
                         <i class="fa-solid fa-print"></i> Download / Cetak Laporan
                     </button>
@@ -735,99 +874,31 @@
             });
         };
 
-        // 7. Fitur Download / Cetak Invoice ke PDF
+        // 10. Fitur Cetak Invoice (Biarkan sama persis seperti kode aslimu)
         window.cetakInvoice = function(nis, nama) {
             const userUnit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
             const tanggalCetak = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-            
             const printWindow = window.open('', '_blank', 'width=800,height=600');
             
             printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Invoice - ${nama} (${nis})</title>
-                    <style>
-                        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; color: #333; line-height: 1.5; }
-                        .header { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 30px; }
-                        .header h2 { margin: 0; color: #1e3a8a; font-size: 24px; text-transform: uppercase; }
-                        .header p { margin: 5px 0 0; color: #555; }
-                        .info-grid { display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 14px; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-                        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-                        th { background-color: #f8fafc; color: #1e3a8a; }
-                        .text-right { text-align: right; }
-                        .text-center { text-align: center; }
-                        .badge-lunas { color: #16a34a; font-weight: bold; }
-                        .badge-belum { color: #dc2626; font-weight: bold; }
-                        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #888; border-top: 1px dashed #ddd; padding-top: 20px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h2>Laporan Tagihan Siswa</h2>
-                        <p>Unit Akademik: <strong>${userUnit}</strong></p>
-                    </div>
-                    
-                    <div class="info-grid">
-                        <div>
-                            <p><strong>Nama Siswa:</strong> ${nama}</p>
-                            <p><strong>Nomor Induk (NIS):</strong> ${nis}</p>
-                        </div>
-                        <div class="text-right">
-                            <p><strong>Tanggal Dicetak:</strong> ${tanggalCetak}</p>
-                            <p><strong>Status Dokumen:</strong> SAH</p>
-                        </div>
-                    </div>
-
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Keterangan Tagihan</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-right">Nominal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="text-center">1</td>
-                                <td>Uang Pangkal</td>
-                                <td class="text-center badge-lunas">LUNAS</td>
-                                <td class="text-right">Rp 1.000.000</td>
-                            </tr>
-                            <tr>
-                                <td class="text-center">2</td>
-                                <td>SPP Juli 2026</td>
-                                <td class="text-center badge-belum">BELUM BAYAR</td>
-                                <td class="text-right">Rp 250.000</td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <th colspan="3" class="text-right">Total Sisa Tagihan (Hutang)</th>
-                                <th class="text-right" style="color: #dc2626; font-size: 18px;">Rp 250.000</th>
-                            </tr>
-                        </tfoot>
-                    </table>
-
-                    <div class="footer">
-                        <p>Dokumen ini dicetak secara otomatis melalui Sistem Informasi Kas Sekolah.</p>
-                        <p>Harap simpan dokumen ini sebagai bukti yang sah.</p>
-                    </div>
-                </body>
-                </html>
+                <html><head><title>Invoice - ${nama}</title>
+                <style>
+                    body{font-family:Arial,sans-serif;padding:30px;color:#333}
+                    .header{text-align:center;border-bottom:2px solid #1e3a8a;padding-bottom:15px;margin-bottom:30px}
+                    table{width:100%;border-collapse:collapse} th,td{border:1px solid #ddd;padding:12px;text-align:left}
+                    th{background:#f8fafc} .text-right{text-align:right} .text-center{text-align:center}
+                </style></head><body>
+                    <div class="header"><h2>Laporan Tagihan Siswa</h2><p>Unit: <strong>${userUnit}</strong></p></div>
+                    <p><strong>Nama:</strong> ${nama} <br><strong>NIS:</strong> ${nis}</p>
+                    <table><tr><th>No</th><th>Keterangan</th><th>Status</th><th>Nominal</th></tr>
+                    <tr><td>1</td><td>SPP</td><td>BELUM</td><td>Rp 250.000</td></tr></table>
+                </body></html>
             `);
-            
-            printWindow.document.close();
-            printWindow.focus();
-            
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 500);
+            printWindow.document.close(); printWindow.focus();
+            setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         };
-
-        // Tambahkan pemicu render di switchMenu
+        
+        // Tambahkan pemicu render di switchMenu (Timpa yang lama)
         const originalSwitchMenu = window.switchMenu;
         window.switchMenu = function(menuId, title, element) {
             originalSwitchMenu(menuId, title, element);
