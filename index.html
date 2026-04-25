@@ -145,14 +145,119 @@
         </div>
     </section>
 
-    <section id="dashboard-section" class="hidden-section flex-grow flex flex-col">
-        <div class="p-8 text-center mt-20">
-            <h1 class="text-4xl font-bold text-dark">Halo, <span id="dash-user-name" class="text-primary"></span>!</h1>
-            <p class="mt-2 text-lg text-slate-600">Selamat datang di Panel Keuangan <span id="dash-unit" class="font-bold text-secondary"></span></p>
-            <p class="mt-6 text-sm text-slate-500 italic">(Desain dashboard dan menu-menu kasir akan kita bangun di tahap selanjutnya)</p>
-            <button onclick="logout()" class="mt-8 bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md transition">
-                <i class="fa-solid fa-power-off"></i> Logout
-            </button>
+   <section id="dashboard-section" class="hidden-section flex-grow flex h-screen overflow-hidden bg-slate-50">
+        <aside id="sidebar" class="bg-primary text-white w-64 flex-shrink-0 hidden md:flex flex-col transition-all duration-300 z-20 absolute md:relative h-full">
+            <div class="p-4 flex items-center justify-between border-b border-blue-800">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-wallet text-2xl text-accent"></i>
+                    <span class="font-bold text-xl tracking-wide">Kas Sekolah</span>
+                </div>
+                <button onclick="toggleSidebar()" class="md:hidden text-white hover:text-accent">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <a href="#" onclick="switchMenu('menu-dashboard', 'Dashboard Utama', this)" class="nav-item active flex items-center gap-3 p-3 rounded-lg bg-blue-800 text-white transition">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
+                </a>
+                <a href="#" onclick="switchMenu('menu-master', 'Master Data', this)" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-blue-800 text-blue-100 transition">
+                    <i class="fa-solid fa-database w-5 text-center"></i> Master Data
+                </a>
+                <a href="#" onclick="switchMenu('menu-kasir', 'Kasir & SPP', this)" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-blue-800 text-blue-100 transition">
+                    <i class="fa-solid fa-cash-register w-5 text-center"></i> Kasir / SPP
+                </a>
+                <a href="#" onclick="switchMenu('menu-pengeluaran', 'Pengeluaran', this)" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-blue-800 text-blue-100 transition">
+                    <i class="fa-solid fa-money-bill-transfer w-5 text-center"></i> Pengeluaran
+                </a>
+                <a href="#" onclick="switchMenu('menu-bku', 'Buku Kas Umum', this)" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-blue-800 text-blue-100 transition">
+                    <i class="fa-solid fa-book w-5 text-center"></i> Buku Kas (BKU)
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-blue-800 bg-dark/20">
+                <div class="text-xs text-blue-200 mb-1">Login sebagai:</div>
+                <div class="font-semibold truncate" id="dash-user-name">Nama Admin</div>
+                <div class="text-xs text-accent font-bold mt-1">Unit: <span id="dash-unit" class="uppercase">SMP</span></div>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col h-screen overflow-hidden w-full relative">
+            <header class="bg-white shadow-sm h-16 flex items-center justify-between px-4 lg:px-8 z-10 flex-shrink-0">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleSidebar()" class="md:hidden text-slate-500 hover:text-primary focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                    <h2 class="font-bold text-slate-700 text-lg hidden sm:block" id="header-title">Dashboard Utama</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="logout()" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg transition flex items-center gap-2 text-sm font-semibold border border-red-100">
+                        <i class="fa-solid fa-power-off"></i> <span class="hidden sm:inline">Keluar</span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-100 p-4 lg:p-8">
+                
+                <div id="menu-dashboard" class="view-section">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-primary flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-slate-500 font-medium mb-1">Total Saldo Kas</div>
+                                <div class="text-2xl lg:text-3xl font-bold text-dark">Rp 0</div>
+                            </div>
+                            <i class="fa-solid fa-wallet text-4xl text-slate-200"></i>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500 flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-slate-500 font-medium mb-1">Pemasukan Bulan Ini</div>
+                                <div class="text-2xl lg:text-3xl font-bold text-dark">Rp 0</div>
+                            </div>
+                            <i class="fa-solid fa-arrow-trend-up text-4xl text-slate-200"></i>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-500 flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-slate-500 font-medium mb-1">Pengeluaran Bulan Ini</div>
+                                <div class="text-2xl lg:text-3xl font-bold text-dark">Rp 0</div>
+                            </div>
+                            <i class="fa-solid fa-arrow-trend-down text-4xl text-slate-200"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="menu-master" class="view-section hidden-section">
+                    <div class="bg-white p-8 rounded-xl shadow-sm text-center text-slate-500 border border-slate-200">
+                        <i class="fa-solid fa-tools text-5xl text-slate-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-slate-700">Area Master Data</h3>
+                        <p class="mt-2">Di sini nanti kita buat tempat untuk mengatur Data Siswa, Dompet, dan Jenis Tagihan.</p>
+                    </div>
+                </div>
+                
+                <div id="menu-kasir" class="view-section hidden-section">
+                    <div class="bg-white p-8 rounded-xl shadow-sm text-center text-slate-500 border border-slate-200">
+                        <i class="fa-solid fa-cash-register text-5xl text-slate-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-slate-700">Area Kasir</h3>
+                        <p class="mt-2">Tempat menerima pembayaran dari siswa akan dibangun di sini.</p>
+                    </div>
+                </div>
+
+                <div id="menu-pengeluaran" class="view-section hidden-section">
+                    <div class="bg-white p-8 rounded-xl shadow-sm text-center text-slate-500 border border-slate-200">
+                        <i class="fa-solid fa-money-bill-transfer text-5xl text-slate-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-slate-700">Area Pengeluaran</h3>
+                        <p class="mt-2">Tempat mencatat uang keluar (operasional, gaji, dll) akan dibangun di sini.</p>
+                    </div>
+                </div>
+
+                <div id="menu-bku" class="view-section hidden-section">
+                    <div class="bg-white p-8 rounded-xl shadow-sm text-center text-slate-500 border border-slate-200">
+                        <i class="fa-solid fa-book text-5xl text-slate-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-slate-700">Area Buku Kas Umum</h3>
+                        <p class="mt-2">Rekapitulasi seluruh transaksi untuk diekspor ke PDF akan muncul di sini.</p>
+                    </div>
+                </div>
+
+            </main>
         </div>
     </section>
 
@@ -351,7 +456,43 @@
                 }
             });
         };
+// --- Logika Sidebar & Navigasi Menu ---
+        window.toggleSidebar = function() {
+            const sidebar = document.getElementById('sidebar');
+            if(sidebar.classList.contains('hidden')) {
+                sidebar.classList.remove('hidden');
+                sidebar.classList.add('flex');
+            } else {
+                sidebar.classList.add('hidden');
+                sidebar.classList.remove('flex');
+            }
+        };
 
+        window.switchMenu = function(menuId, title, element) {
+            // Sembunyikan semua konten
+            const views = document.querySelectorAll('.view-section');
+            views.forEach(view => view.classList.add('hidden-section'));
+            
+            // Tampilkan konten yang dipilih
+            document.getElementById(menuId).classList.remove('hidden-section');
+            
+            // Ubah Judul Navbar (khusus tampilan desktop)
+            document.getElementById('header-title').innerText = title;
+            
+            // Ubah gaya tombol menu yang aktif di sidebar
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('bg-blue-800', 'text-white');
+                item.classList.add('text-blue-100');
+            });
+            element.classList.add('bg-blue-800', 'text-white');
+            element.classList.remove('text-blue-100');
+
+            // Otomatis tutup sidebar di mode HP setelah klik menu
+            if(window.innerWidth < 768) {
+                toggleSidebar();
+            }
+        };
         // --- Cek Sesi Otomatis ---
         window.onload = () => {
             const sesiAktif = localStorage.getItem('sesi_kas_sekolah');
