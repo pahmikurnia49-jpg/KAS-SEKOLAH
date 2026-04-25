@@ -164,8 +164,8 @@
                 <a href="#" onclick="switchMenu('menu-master', 'Master Data', this)" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-blue-800 text-blue-100 transition">
                     <i class="fa-solid fa-database w-5 text-center"></i> Master Data
                 </a>
-                <a href="#" onclick="switchMenu('menu-kasir', 'Kasir & SPP', this)" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-blue-800 text-blue-100 transition">
-                    <i class="fa-solid fa-cash-register w-5 text-center"></i> Kasir / SPP
+                <a href="#" onclick="switchMenu('menu-kasir', 'Kasir', this)" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-blue-800 text-blue-100 transition">
+                    <i class="fa-solid fa-cash-register w-5 text-center"></i> Kasir
                 </a>
                 <a href="#" onclick="switchMenu('menu-pengeluaran', 'Pengeluaran', this)" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-blue-800 text-blue-100 transition">
                     <i class="fa-solid fa-money-bill-transfer w-5 text-center"></i> Pengeluaran
@@ -200,22 +200,37 @@
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-100 p-4 lg:p-8">
                 
                 <div id="menu-dashboard" class="view-section">
+                    
+                    <div class="mb-6 bg-gradient-to-r from-secondary to-cyan-400 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between relative overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1">
+                        <i class="fa-solid fa-clock absolute -right-4 -bottom-4 text-9xl opacity-20 transform -rotate-12"></i>
+                        
+                        <div class="z-10 text-center md:text-left mb-4 md:mb-0">
+                            <h2 class="text-2xl font-bold mb-1 drop-shadow-sm">Selamat Datang! 👋</h2>
+                            <p class="text-blue-100 text-sm">Semoga harimu menyenangkan dan pencatatan kas lancar.</p>
+                        </div>
+                        
+                        <div class="z-10 flex flex-col items-center bg-white/20 backdrop-blur-md px-6 py-3 rounded-xl border border-white/30 shadow-inner">
+                            <div id="realtime-time" class="text-4xl font-black tracking-wider drop-shadow-md font-mono">00:00:00</div>
+                            <div id="realtime-date" class="text-sm font-semibold mt-1 text-blue-50 uppercase tracking-wider">Senin, 1 Jan 2024</div>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-primary flex items-center justify-between">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-primary flex items-center justify-between transition hover:shadow-md">
                             <div>
                                 <div class="text-sm text-slate-500 font-medium mb-1">Total Saldo Kas</div>
                                 <div class="text-2xl lg:text-3xl font-bold text-dark">Rp 0</div>
                             </div>
                             <i class="fa-solid fa-wallet text-4xl text-slate-200"></i>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500 flex items-center justify-between">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500 flex items-center justify-between transition hover:shadow-md">
                             <div>
                                 <div class="text-sm text-slate-500 font-medium mb-1">Pemasukan Bulan Ini</div>
                                 <div class="text-2xl lg:text-3xl font-bold text-dark">Rp 0</div>
                             </div>
                             <i class="fa-solid fa-arrow-trend-up text-4xl text-slate-200"></i>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-500 flex items-center justify-between">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-500 flex items-center justify-between transition hover:shadow-md">
                             <div>
                                 <div class="text-sm text-slate-500 font-medium mb-1">Pengeluaran Bulan Ini</div>
                                 <div class="text-2xl lg:text-3xl font-bold text-dark">Rp 0</div>
@@ -493,6 +508,38 @@
                 toggleSidebar();
             }
         };
+        // --- Widget Jam & Tanggal Realtime ---
+        function updateClock() {
+            const now = new Date();
+            
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const dayName = days[now.getDay()];
+            const date = now.getDate();
+            const monthName = months[now.getMonth()];
+            const year = now.getFullYear();
+            
+            let hours = now.getHours().toString().padStart(2, '0');
+            let minutes = now.getMinutes().toString().padStart(2, '0');
+            let seconds = now.getSeconds().toString().padStart(2, '0');
+
+            const timeString = `${hours}:${minutes}:${seconds}`;
+            const dateString = `${dayName}, ${date} ${monthName} ${year}`;
+
+            const timeElement = document.getElementById('realtime-time');
+            const dateElement = document.getElementById('realtime-date');
+
+            // Update teks kalau elemennya lagi tampil di layar
+            if(timeElement && dateElement) {
+                timeElement.innerText = timeString;
+                dateElement.innerText = dateString;
+            }
+        }
+
+        // Jalankan jam setiap detik
+        setInterval(updateClock, 1000);
+        updateClock(); // Panggil sekali di awal biar nggak nunggu 1 detik dulu
         // --- Cek Sesi Otomatis ---
         window.onload = () => {
             const sesiAktif = localStorage.getItem('sesi_kas_sekolah');
