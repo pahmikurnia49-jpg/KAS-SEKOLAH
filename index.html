@@ -1098,57 +1098,34 @@ window.hapusKatalog = async function(id) {
                 tampilkanDashboard(dataSesi.nama, dataSesi.unit);
             }
         };
-       window.switchMasterTab = function(tabName) {
-            // Ambil elemen
-            const tabSiswa = document.getElementById('tab-content-siswa');
-            const tabTagihan = document.getElementById('tab-content-tagihan');
-            const btnSiswa = document.getElementById('tab-btn-siswa');
-            const btnTagihan = document.getElementById('tab-btn-tagihan');
+     window.switchMasterTab = function(tabName) {
+    const tabSiswa = document.getElementById('tab-content-siswa');
+    const tabTagihan = document.getElementById('tab-content-tagihan');
+    const btnSiswa = document.getElementById('tab-btn-siswa');
+    const btnTagihan = document.getElementById('tab-btn-tagihan');
 
-            if(tabName === 'siswa') {
-                // Tampilkan tab Siswa
-                tabSiswa.classList.remove('hidden');
-                tabSiswa.classList.add('block');
-                
-                // Sembunyikan tab Tagihan
-                tabTagihan.classList.add('hidden');
-                tabTagihan.classList.remove('block');
-                
-                // Styling tombol (Siswa Aktif)
-                btnSiswa.className = "px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition";
-                btnTagihan.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
-                
-                // Tarik data siswa pas tabnya diklik
-                if(typeof window.renderSiswa === 'function') window.renderSiswa();
-
-            } else {
-                // Tampilkan tab Tagihan
-                tabTagihan.classList.remove('hidden');
-                tabTagihan.classList.add('block');
-                
-                // Sembunyikan tab Siswa
-                tabSiswa.classList.add('hidden');
-                tabSiswa.classList.remove('block');
-                
-                // Styling tombol (Tagihan Aktif)
-                btnTagihan.className = "px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition";
-                btnSiswa.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
-                
-                // 🔥 INI DIA KUNCINYA: Tarik data tagihan pas tabnya diklik!
-                if(typeof window.renderKatalog === 'function') window.renderKatalog();
-            }
-        };
-  
-        // Tampilkan Siswa, Sembunyikan Tagihan
+    if(tabName === 'siswa') {
         tabSiswa.classList.remove('hidden');
         tabSiswa.classList.add('block');
         tabTagihan.classList.add('hidden');
         tabTagihan.classList.remove('block');
         
-        // Ubah warna tombol
         btnSiswa.className = "px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition";
         btnTagihan.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
+        
+        if(typeof window.renderSiswa === 'function') window.renderSiswa();
     } else {
+        tabTagihan.classList.remove('hidden');
+        tabTagihan.classList.add('block');
+        tabSiswa.classList.add('hidden');
+        tabSiswa.classList.remove('block');
+        
+        btnTagihan.className = "px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition";
+        btnSiswa.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
+        
+        if(typeof window.renderKatalog === 'function') window.renderKatalog();
+    }
+};
         // Tampilkan Tagihan, Sembunyikan Siswa
         tabTagihan.classList.remove('hidden');
         tabTagihan.classList.add('block');
