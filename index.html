@@ -242,173 +242,131 @@
                 </div>
 
                 <div id="menu-master" class="view-section hidden-section relative">
-                    <div class="flex border-b border-gray-200 mb-6">
-            <button id="tab-btn-siswa" onclick="switchMasterTab('siswa')" class="px-6 py-3 border-b-2 border-primary text-primary font-bold hover:bg-slate-50 transition">
-                <i class="fa-solid fa-users mr-2"></i> Data Siswa
-            </button>
-            <button id="tab-btn-tagihan" onclick="switchMasterTab('tagihan')" class="px-6 py-3 text-slate-400 font-bold hover:text-primary hover:bg-slate-50 transition">
-                <i class="fa-solid fa-file-invoice-dollar mr-2"></i> Master Tagihan
-            </button>
+                    <div class="p-6">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-1">Master Data</h2>
+        <p class="text-gray-500 text-sm">Kelola data murid dan konfigurasi tagihan sekolah.</p>
+    </div>
+
+    <div class="flex border-b border-gray-200 mb-6">
+        <button id="tab-btn-siswa" onclick="switchMasterTab('siswa')" class="px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition">
+            <i class="fa-solid fa-users mr-2"></i> Data Siswa
+        </button>
+        <button id="tab-btn-tagihan" onclick="switchMasterTab('tagihan')" class="px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition">
+            <i class="fa-solid fa-file-invoice-dollar mr-2"></i> Master Tagihan
+        </button>
+    </div>
+
+    <div id="tab-content-siswa" class="block">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-gray-700 text-lg">Data Master Siswa</h3>
+            <div class="flex gap-2">
+                <button class="bg-blue-800 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-900 transition"><i class="fa-solid fa-plus mr-1"></i> Tambah Siswa</button>
+                <button class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700 transition"><i class="fa-solid fa-file-excel mr-1"></i> Impor Excel/CSV</button>
+            </div>
         </div>
 
-        <div id="tab-content-siswa" class="block">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-800">Data Master Siswa</h3>
-                    <p class="text-sm text-slate-500">Kelola data murid dan pantau status tagihan mereka.</p>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="openModalSiswa()" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
-                        <i class="fa-solid fa-plus"></i> Tambah Siswa
-                    </button>
-                    <label class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition cursor-pointer">
-                        <i class="fa-solid fa-file-excel"></i> Impor Excel/CSV
-                        <input type="file" id="excel-file" class="hidden" accept=".csv, .xls, .xlsx" onchange="importExcel(event)">
-                    </label>
-                </div>
-            </div>
+        <div class="bg-white p-4 rounded-xl border shadow-sm mb-4">
+            <input type="text" class="w-full bg-gray-50 border p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" placeholder="🔍 Cari nama atau NIS siswa...">
+        </div>
+        <div class="bg-white rounded-xl border shadow-sm overflow-hidden text-sm">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 font-bold text-gray-600">
+                    <tr><th class="p-4">NIS</th><th class="p-4">Nama Lengkap</th><th class="p-4">Thn Masuk</th><th class="p-4">Kelas / Status</th><th class="p-4">Aksi</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="5" class="p-8 text-center text-gray-400 italic">Belum ada data siswa. Klik Tambah Siswa atau Impor Excel.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-content-tagihan" class="hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            ```
+            <div class="bg-white p-6 rounded-xl border shadow-sm h-fit">
+                <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Katalog Jenis Tagihan</h3>
+                <form id="form-buat-tagihan" onsubmit="buatKatalog(event)" class="space-y-4 mb-6">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500">Nama Tagihan</label>
+                        <input type="text" id="nama-tagihan" class="w-full border p-2 rounded-lg outline-none focus:border-blue-500" placeholder="ex: SPP Juli 2024" required>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500">Nominal Default (Rp)</label>
+                        <input type="number" id="nominal-tagihan" class="w-full border p-2 rounded-lg outline-none focus:border-blue-500" placeholder="250000" required>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition">Buat Tagihan Baru</button>
+                </form>
 
-### LANGKAH 2: Tambahkan Menu Tagihan di Bawah Tabel
-Setelah langkah 1 selesai, *scroll* ke bawah sampai kamu nemu penutup tabel siswa kamu (biasanya ada tag `</table>` atau `</div>` penutup kotak putih tabelnya, tepat sebelum akhir dari `menu-master`). 
+                <h4 class="text-xs font-bold text-gray-500 mb-2 uppercase">Daftar Katalog Tersedia</h4>
+                <ul id="list-katalog" class="space-y-2 text-sm">
+                    <li class="p-3 bg-gray-50 border rounded-lg flex justify-between items-center">
+                        <div><p class="font-bold text-gray-700">SPP Juli 2024</p><p class="text-xs text-blue-600">Rp 200.000</p></div>
+                        <button class="text-red-500 hover:text-red-700"><i class="fa fa-trash"></i></button>
+                    </li>
+                </ul>
+            </div>
 
-Taruh kode ini tepat **di bawah tabel siswa kamu**:
-
-```html
-        </div> <div id="tab-content-tagihan" class="hidden">
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl border shadow-sm">
+                <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Sebar Tagihan ke Siswa (Bulk Apply)</h3>
                 
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
-                    <h3 class="font-bold text-slate-800 mb-4 border-b pb-2">Katalog Jenis Tagihan</h3>
-                    <form id="form-buat-tagihan" onsubmit="buatKatalog(event)" class="space-y-4 mb-6">
-                        <div>
-                            <label class="text-xs font-bold text-slate-500">Nama Tagihan</label>
-                            <input type="text" id="nama-tagihan" class="w-full border border-slate-200 p-2.5 rounded-lg outline-none focus:border-primary text-sm" placeholder="ex: SPP Juli 2024" required>
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-500">Nominal Default (Rp)</label>
-                            <input type="number" id="nominal-tagihan" class="w-full border border-slate-200 p-2.5 rounded-lg outline-none focus:border-primary text-sm" placeholder="250000" required>
-                        </div>
-                        <button type="submit" class="w-full bg-primary text-white py-2.5 rounded-lg font-bold text-sm hover:bg-blue-700 transition">Buat Tagihan Baru</button>
-                    </form>
-
-                    <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">Daftar Katalog Tersedia</h4>
-                    <ul id="list-katalog" class="space-y-2 text-sm">
-                        <li class="p-3 bg-slate-50 border border-slate-100 rounded-lg text-center text-slate-400 italic">Belum ada katalog tagihan</li>
-                    </ul>
-                </div>
-
-                <div class="xl:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="font-bold text-slate-800 mb-4 border-b pb-2">Sebar Tagihan ke Siswa (Bulk Apply)</h3>
-                    
-                    <div class="flex flex-col md:flex-row gap-4 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <div class="flex-1">
-                            <label class="text-xs font-bold text-slate-500">Pilih Tagihan</label>
-                            <select id="pilih-katalog" class="w-full border border-slate-200 p-2.5 rounded-lg outline-none text-sm">
-                                <option value="">-- Pilih dari Katalog --</option>
-                            </select>
-                        </div>
-                        <div class="flex-1">
-                            <label class="text-xs font-bold text-slate-500">Terapkan Kepada</label>
-                            <select id="pilih-target" class="w-full border border-slate-200 p-2.5 rounded-lg outline-none text-sm">
-                                <option value="SEMUA">Semua Siswa</option>
-                                <option value="Kls 7">Khusus Kelas 7</option>
-                                <option value="Kls 8">Khusus Kelas 8</option>
-                                <option value="Kls 9">Khusus Kelas 9</option>
-                            </select>
-                        </div>
-                        <div class="flex items-end">
-                            <button onclick="terapkanTagihan()" class="w-full md:w-auto bg-green-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-green-700">Terapkan!</button>
-                        </div>
+                <div class="flex gap-4 mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <div class="flex-1">
+                        <label class="text-xs font-bold text-gray-500">Pilih Tagihan dari Katalog</label>
+                        <select id="pilih-katalog" class="w-full border p-2 rounded-lg outline-none">
+                            <option value="">-- Pilih Tagihan --</option>
+                            <option value="SPP Juli 2024">SPP Juli 2024 (Rp 200.000)</option>
+                        </select>
                     </div>
-
-                    <div class="mb-3 flex justify-between items-center">
-                        <h4 class="font-bold text-slate-700 text-sm">Daftar Penerima Tagihan</h4>
-                        <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-1 rounded font-bold uppercase tracking-wider">Bisa edit nominal per siswa di tabel</span>
+                    <div class="flex-1">
+                        <label class="text-xs font-bold text-gray-500">Terapkan Kepada</label>
+                        <select id="pilih-target" class="w-full border p-2 rounded-lg outline-none">
+                            <option value="SEMUA">Semua Siswa</option>
+                            <option value="KELAS-7">Khusus Kelas 7</option>
+                            <option value="KELAS-8">Khusus Kelas 8</option>
+                        </select>
                     </div>
-                    
-                    <div class="overflow-hidden border border-slate-200 rounded-xl shadow-sm text-sm">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-50 font-bold text-slate-500 text-xs uppercase">
-                                <tr>
-                                    <th class="p-3 border-b">Nama Siswa</th>
-                                    <th class="p-3 border-b">Kelas</th>
-                                    <th class="p-3 border-b w-48">Nominal (Rp)</th>
-                                    <th class="p-3 border-b text-center w-24">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-penerima-tagihan" class="divide-y divide-slate-100">
-                                <tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Pilih katalog dan terapkan untuk melihat daftar siswa.</td></tr>
-                            </tbody>
-                        </table>
+                    <div class="flex items-end">
+                        <button onclick="terapkanTagihan()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700">Terapkan!</button>
                     </div>
                 </div>
+
+                <div class="mb-2 flex justify-between items-center">
+                    <h4 class="font-bold text-gray-700 text-sm">Daftar Penerima Tagihan</h4>
+                    <span class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded font-bold">Bisa edit nominal per siswa di tabel ini</span>
+                </div>
+                
+                <div class="overflow-hidden border rounded-xl shadow-sm text-sm">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-100 font-bold text-gray-600">
+                            <tr>
+                                <th class="p-3">Nama Siswa</th>
+                                <th class="p-3">Kelas</th>
+                                <th class="p-3 w-48">Nominal Tagihan (Rp)</th>
+                                <th class="p-3 text-center w-24">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-penerima-tagihan" class="divide-y">
+                            <tr>
+                                <td class="p-3 font-bold">Ahmad Budi</td>
+                                <td class="p-3">Kelas 7A</td>
+                                <td class="p-3"><input type="number" value="200000" class="w-full border-b-2 border-blue-200 outline-none focus:border-blue-600 font-bold text-blue-700 p-1"></td>
+                                <td class="p-3 text-center"><button class="text-green-600 font-bold text-xs"><i class="fa fa-save"></i> Simpan</button></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold">Siti Aisyah</td>
+                                <td class="p-3">Kelas 7A</td>
+                                <td class="p-3"><input type="number" value="100000" class="w-full border-b-2 border-amber-400 outline-none focus:border-blue-600 font-bold text-amber-600 p-1" title="Anak yatim, diskon 50%"></td>
+                                <td class="p-3 text-center"><button class="text-green-600 font-bold text-xs"><i class="fa fa-save"></i> Simpan</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </div>
-
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6">
-                        <div class="relative">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                            <input type="text" id="search-siswa" onkeyup="filterSiswa()" placeholder="Cari nama atau NIS siswa..." class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-slate-50 focus:bg-white transition">
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead class="bg-slate-50 border-b border-slate-200">
-                                    <tr>
-                                        <th class="p-4 font-bold text-slate-700 text-sm">NIS</th>
-                                        <th class="p-4 font-bold text-slate-700 text-sm">Nama Lengkap</th>
-                                        <th class="p-4 font-bold text-slate-700 text-sm">Thn Masuk</th>
-                                        <th class="p-4 font-bold text-slate-700 text-sm text-center">Kelas / Status</th>
-                                        <th class="p-4 font-bold text-slate-700 text-sm text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-siswa-body" class="divide-y divide-slate-100 text-sm text-slate-600">
-                                    </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div id="modal-siswa" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-all opacity-0">
-                        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-all duration-300" id="modal-siswa-content">
-                            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                                <h3 class="text-lg font-bold text-slate-800" id="modal-siswa-title">Tambah Siswa Baru</h3>
-                                <button onclick="closeModalSiswa()" class="text-slate-400 hover:text-red-500 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
-                            </div>
-                            <div class="p-6 space-y-4">
-                                <input type="hidden" id="form-mode" value="add">
-                                <input type="hidden" id="old-nis" value="">
-                                <div>
-                                    <label class="block text-sm font-semibold text-slate-700 mb-1">NIS <span class="text-red-500">*</span></label>
-                                    <input type="text" id="input-nis" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition bg-slate-50 focus:bg-white" placeholder="Masukkan NIS Siswa">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
-                                    <input type="text" id="input-nama" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition bg-slate-50 focus:bg-white" placeholder="Contoh: Budi Santoso">
-                                </div>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-slate-700 mb-1">Tahun Masuk <span class="text-red-500">*</span></label>
-                                        <input type="number" id="input-tahun" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition bg-slate-50 focus:bg-white" placeholder="Contoh: 2023">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-slate-700 mb-1">Kelas Awal <span class="text-red-500">*</span></label>
-                                        <input type="number" id="input-kelas-awal" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition bg-slate-50 focus:bg-white" placeholder="Contoh: 10">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="p-5 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-                                <button onclick="closeModalSiswa()" class="px-5 py-2 rounded-lg text-slate-600 font-semibold hover:bg-slate-200 transition">Batal</button>
-                                <button onclick="submitFormSiswa()" class="px-5 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-blue-700 transition shadow-md">
-                                    Simpan Data
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    </div>
+</div>
                 
                 <div id="menu-kasir" class="view-section hidden-section">
                     <div class="bg-white p-8 rounded-xl shadow-sm text-center text-slate-500 border border-slate-200">
