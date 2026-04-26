@@ -286,7 +286,7 @@
                             <th class="p-4">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="table-siswa">
+                    <tbody id="table-siswa-body">
                         <tr><td colspan="5" class="p-8 text-center text-gray-400 italic">Memuat data atau belum ada data siswa...</td></tr>
                     </tbody>
                 </table>
@@ -738,6 +738,27 @@
             } catch (e) { Swal.fire('Gagal', e.message, 'error'); }
         };
 
+        // 3.5 Fitur Buka Modal Tambah Siswa (Manual)
+        window.openModalSiswa = function() {
+            // Kosongkan form biar bersih pas mau nambah data baru
+            document.getElementById('form-mode').value = 'tambah';
+            document.getElementById('old-nis').value = '';
+            document.getElementById('input-nis').value = '';
+            document.getElementById('input-nama').value = '';
+            document.getElementById('input-tahun').value = '';
+            document.getElementById('input-kelas-awal').value = '';
+            
+            document.getElementById('modal-siswa-title').innerText = 'Tambah Data Siswa Baru';
+            
+            // Tampilkan Modalnya
+            const modal = document.getElementById('modal-siswa');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                document.getElementById('modal-siswa-content').classList.remove('scale-95');
+            }, 10);
+        };
+        
         // 4. Fitur Edit Siswa (Ambil data dari DB ke Modal)
         window.editSiswa = async function(nis) {
             const userUnit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
