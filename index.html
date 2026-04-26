@@ -478,7 +478,7 @@
             }
         });
 
-        // --- Logika Masuk (Login) ---
+      // --- Logika Masuk (Login) ---
         document.getElementById('form-login').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('login-username').value;
@@ -501,7 +501,15 @@
                         }));
                         
                         Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Login Berhasil!', showConfirmButton: false, timer: 1500});
+                        
+                        // Pindah tampilan ke Dashboard
                         tampilkanDashboard(userData.nama_admin, userData.unit);
+                        
+                        // 🔥 KUNCI RAHASIANYA DI SINI: Langsung suruh tarik data saat itu juga!
+                        if (typeof renderSiswa === 'function') {
+                            renderSiswa();
+                        }
+                        
                         document.getElementById('form-login').reset();
                     } else {
                         Swal.fire('Akses Ditolak', 'Password yang Anda masukkan salah.', 'error');
