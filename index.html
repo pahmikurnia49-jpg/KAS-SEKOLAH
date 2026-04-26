@@ -682,14 +682,14 @@
 
         // 2. Fungsi Buka & Tutup Modal UI Modern
         window.openModalSiswa = function() {
-            document.getElementById('form-mode').value = 'add';
+            document.getElementById('form-mode').value = 'tambah';
             document.getElementById('old-nis').value = '';
             document.getElementById('input-nis').value = '';
             document.getElementById('input-nama').value = '';
             document.getElementById('input-tahun').value = new Date().getFullYear();
-            document.getElementById('input-kelas-awal').value = '';
+            document.getElementById('input-kelas-awal').value = '7';
             
-            document.getElementById('modal-siswa-title').innerText = 'Tambah Siswa Baru';
+            document.getElementById('modal-siswa-title').innerText = 'Tambah Data Siswa Baru';
             
             const modal = document.getElementById('modal-siswa');
             modal.classList.remove('hidden');
@@ -707,54 +707,9 @@
         };
 
         // 3. Proses Simpan / Edit Data Siswa
-        window.submitFormSiswa = async function() {
-            const mode = document.getElementById('form-mode').value;
-            const oldNis = document.getElementById('old-nis').value;
-            
-            const data = {
-                nis: document.getElementById('input-nis').value.trim(),
-                nama: document.getElementById('input-nama').value.trim(),
-                tahun: document.getElementById('input-tahun').value,
-                kelasAwal: document.getElementById('input-kelas-awal').value
-            };
-            
-            if(!data.nis || !data.nama || !data.tahun || !data.kelasAwal) {
-                Swal.fire('Oopss!', 'Semua kolom wajib diisi ya!', 'warning');
-                return;
-            }
-            
-            const userUnit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            
-            try {
-                // Kalau edit dan NIS-nya diganti, hapus data lama dulu biar gak dobel
-                if (mode === 'edit' && oldNis !== data.nis) {
-                    await set(ref(db, `students/${userUnit}/${oldNis}`), null);
-                }
-                
-                await set(ref(db, `students/${userUnit}/${data.nis}`), data);
-                Swal.fire({icon: 'success', title: 'Berhasil!', text: 'Data siswa tersimpan.', timer: 1500, showConfirmButton: false});
-                closeModalSiswa();
-                renderSiswa();
-            } catch (e) { Swal.fire('Gagal', e.message, 'error'); }
-        };
-
-        // 3.5 Fitur Buka Modal Tambah Siswa (Manual)
-        window.openModalSiswa = function() {
-            // Kosongkan form biar bersih pas mau nambah data baru
-            document.getElementById('form-mode').value = 'tambah';
-            document.getElementById('old-nis').value = '';
-            document.getElementById('input-nis').value = '';
-            document.getElementById('input-nama').value = '';
-            document.getElementById('input-tahun').value = '';
-            document.getElementById('input-kelas-awal').value = '';
-            
-            document.getElementById('modal-siswa-title').innerText = 'Tambah Data Siswa Baru';
-
-            // Fitur Simpan Siswa (Bisa buat Tambah Baru / Edit Data)
         window.simpanSiswa = async function(e) {
-            e.preventDefault(); // Wajib! Biar website nggak nge-reload pas tombol diklik
+            e.preventDefault(); 
 
-            // 1. Ambil data dari form pop-up
             const mode = document.getElementById('form-mode').value;
             const oldNis = document.getElementById('old-nis').value;
             const nis = document.getElementById('input-nis').value.trim();
@@ -762,24 +717,22 @@
             const tahun = document.getElementById('input-tahun').value.trim();
             const kelasAwal = document.getElementById('input-kelas-awal').value;
 
-            // 2. Ambil unit sekolah dari sesi login (misal: SMP/SMA)
-            const sesi = JSON.parse(localStorage.getItem('sesi_kas_sekolah'));
-            if (!sesi || !sesi.unit) {
-                Swal.fire('Error', 'Sesi login tidak terdeteksi, coba login ulang ya.', 'error');
+            if(!nis || !nama || !tahun || !kelasAwal) {
+                Swal.fire('Oopss!', 'Semua kolom wajib diisi ya!', 'warning');
                 return;
             }
+
+            const sesi = JSON.parse(localStorage.getItem('sesi_kas_sekolah'));
+            if (!sesi || !sesi.unit) return Swal.fire('Error', 'Sesi login tidak terdeteksi.', 'error');
             const userUnit = sesi.unit;
 
-            // 3. Mulai proses simpan ke Firebase Database
             try {
                 Swal.fire({title: 'Menyimpan Data...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
 
-                // Kalau lagi mode "Edit" dan NIS diganti, kita hapus dulu data yang lama
                 if (mode === 'edit' && oldNis && oldNis !== nis) {
                     await set(ref(db, `students/${userUnit}/${oldNis}`), null);
                 }
 
-                // Tembak data barunya ke Firebase
                 await set(ref(db, `students/${userUnit}/${nis}`), {
                     nis: nis,
                     nama: nama,
@@ -787,23 +740,12 @@
                     kelasAwal: kelasAwal
                 });
 
-                // Kalau sukses, kasih notif, tutup pop-up, dan refresh tabel!
                 Swal.fire({icon: 'success', title: 'Berhasil!', text: 'Data siswa tersimpan aman.', timer: 1500, showConfirmButton: false});
-                
                 closeModalSiswa(); 
                 renderSiswa(); 
-
             } catch (error) {
                 Swal.fire('Waduh Gagal', error.message, 'error');
             }
-        };
-            // Tampilkan Modalnya
-            const modal = document.getElementById('modal-siswa');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                document.getElementById('modal-siswa-content').classList.remove('scale-95');
-            }, 10);
         };
         
         // 4. Fitur Edit Siswa (Ambil data dari DB ke Modal)
@@ -1010,13 +952,6 @@
             setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         };
         
-        // Tambahkan pemicu render di switchMenu (Timpa yang lama)
-        const originalSwitchMenu = window.switchMenu;
-        window.switchMenu = function(menuId, title, element) {
-            originalSwitchMenu(menuId, title, element);
-            if(menuId === 'menu-master') renderSiswa();
-        };
-
         window.openModalSiswa = function() {
     const modal = document.getElementById('modal-siswa');
     modal.classList.remove('hidden');
