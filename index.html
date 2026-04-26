@@ -981,7 +981,10 @@ window.closeModalSiswa = function() {
     const btnSiswa = document.getElementById('tab-btn-siswa');
     const btnTagihan = document.getElementById('tab-btn-tagihan');
 
-    if (tabName === 'siswa') {
+    if(tabName === 'siswa') {
+        renderSiswa(); // Biar tiap buka tab siswa, datanya fresh!
+    }
+};
         // Tampilkan Siswa, Sembunyikan Tagihan
         tabSiswa.classList.remove('hidden');
         tabSiswa.classList.add('block');
@@ -1003,6 +1006,16 @@ window.closeModalSiswa = function() {
         btnSiswa.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
     }
 }
+        // Fitur Panggil Data Otomatis Pas Halaman Dibuka / Refresh
+window.addEventListener('DOMContentLoaded', () => {
+    const sesi = JSON.parse(localStorage.getItem('sesi_kas_sekolah'));
+    // Cek kalau udah login, langsung otomatis tarik data siswa!
+    if(sesi && sesi.unit) {
+        if(typeof renderSiswa === 'function') {
+            renderSiswa();
+        }
+    }
+});
     </script>
     <div id="modal-siswa" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-center justify-center p-4">
     <div id="modal-siswa-content" class="bg-white rounded-2xl shadow-xl w-full max-w-md transform scale-95 transition-all duration-300">
