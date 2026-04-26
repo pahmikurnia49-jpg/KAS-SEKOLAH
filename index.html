@@ -1098,54 +1098,50 @@ window.hapusKatalog = async function(id) {
                 tampilkanDashboard(dataSesi.nama, dataSesi.unit);
             }
         };
-     window.switchMasterTab = function(tabName) {
-    const tabSiswa = document.getElementById('tab-content-siswa');
-    const tabTagihan = document.getElementById('tab-content-tagihan');
-    const btnSiswa = document.getElementById('tab-btn-siswa');
-    const btnTagihan = document.getElementById('tab-btn-tagihan');
 
-    if(tabName === 'siswa') {
-        tabSiswa.classList.remove('hidden');
-        tabSiswa.classList.add('block');
-        tabTagihan.classList.add('hidden');
-        tabTagihan.classList.remove('block');
-        
-        btnSiswa.className = "px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition";
-        btnTagihan.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
-        
-        if(typeof window.renderSiswa === 'function') window.renderSiswa();
-    } else {
-        tabTagihan.classList.remove('hidden');
-        tabTagihan.classList.add('block');
-        tabSiswa.classList.add('hidden');
-        tabSiswa.classList.remove('block');
-        
-        btnTagihan.className = "px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition";
-        btnSiswa.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
-        
-        if(typeof window.renderKatalog === 'function') window.renderKatalog();
-    }
-};
-        // Tampilkan Tagihan, Sembunyikan Siswa
-        tabTagihan.classList.remove('hidden');
-        tabTagihan.classList.add('block');
-        tabSiswa.classList.add('hidden');
-        tabSiswa.classList.remove('block');
-        
-        // Ubah warna tombol
-        btnTagihan.className = "px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition";
-        btnSiswa.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
-    }
-};
-        // Fitur Panggil Data Otomatis Pas Halaman Dibuka / Refresh
-window.addEventListener('DOMContentLoaded', () => {
-    const sesi = JSON.parse(localStorage.getItem('sesi_kas_sekolah'));
-    // Cek kalau udah login, langsung otomatis tarik data siswa!
-    if(sesi && sesi.unit) {
-        if(typeof renderSiswa === 'function') {
-            renderSiswa();
-        }
-});
+        // --- Fungsi Pindah Tab Master Data ---
+        window.switchMasterTab = function(tabName) {
+            const tabSiswa = document.getElementById('tab-content-siswa');
+            const tabTagihan = document.getElementById('tab-content-tagihan');
+            const btnSiswa = document.getElementById('tab-btn-siswa');
+            const btnTagihan = document.getElementById('tab-btn-tagihan');
+
+            if(tabName === 'siswa') {
+                tabSiswa.classList.remove('hidden');
+                tabSiswa.classList.add('block');
+                tabTagihan.classList.add('hidden');
+                tabTagihan.classList.remove('block');
+                
+                btnSiswa.className = "px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition";
+                btnTagihan.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
+                
+                if(typeof window.renderSiswa === 'function') window.renderSiswa();
+            } else {
+                tabTagihan.classList.remove('hidden');
+                tabTagihan.classList.add('block');
+                tabSiswa.classList.add('hidden');
+                tabSiswa.classList.remove('block');
+                
+                btnTagihan.className = "px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition";
+                btnSiswa.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
+                
+                if(typeof window.renderKatalog === 'function') window.renderKatalog();
+            }
+        };
+
+        // --- Fitur Panggil Data Otomatis Pas Halaman Dibuka / Refresh ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const sesi = localStorage.getItem('sesi_kas_sekolah');
+            if(sesi) {
+                const parsedSesi = JSON.parse(sesi);
+                if(parsedSesi && parsedSesi.unit) {
+                    if(typeof window.renderSiswa === 'function') {
+                        window.renderSiswa();
+                    }
+                }
+            }
+        });
+    </script>
     </script>
     <div id="modal-siswa" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-center justify-center p-4">
     <div id="modal-siswa-content" class="bg-white rounded-2xl shadow-xl w-full max-w-md transform scale-95 transition-all duration-300">
