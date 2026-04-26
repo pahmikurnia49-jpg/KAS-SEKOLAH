@@ -969,6 +969,21 @@
             originalSwitchMenu(menuId, title, element);
             if(menuId === 'menu-master') renderSiswa();
         };
+
+        window.openModalSiswa = function() {
+    const modal = document.getElementById('modal-siswa');
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        document.getElementById('modal-siswa-content').classList.remove('scale-95');
+    }, 10);
+};
+
+window.closeModalSiswa = function() {
+    const modal = document.getElementById('modal-siswa');
+    modal.classList.add('opacity-0');
+    setTimeout(() => { modal.classList.add('hidden'); }, 300);
+};
         // --- Cek Sesi Otomatis ---
         window.onload = () => {
             const sesiAktif = localStorage.getItem('sesi_kas_sekolah');
@@ -1007,5 +1022,11 @@
     }
 }
     </script>
+    <div id="modal-siswa" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-center justify-center p-4">
+    <div id="modal-siswa-content" class="bg-white rounded-2xl shadow-xl w-full max-w-md transform scale-95 transition-all duration-300 p-6">
+        <h3 id="modal-siswa-title" class="font-bold text-lg mb-4">Tambah Data Siswa</h3>
+        <button onclick="closeModalSiswa()" class="text-red-500 float-right mt--10"><i class="fa fa-times"></i> Tutup</button>
+        </div>
+</div>
 </body>
 </html>
