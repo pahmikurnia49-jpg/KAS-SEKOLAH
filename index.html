@@ -1136,7 +1136,7 @@ window.hapusKatalog = async function(id) {
         btnTagihan.className = "px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition";
         btnSiswa.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
     }
-}
+};
         // Fitur Panggil Data Otomatis Pas Halaman Dibuka / Refresh
 window.addEventListener('DOMContentLoaded', () => {
     const sesi = JSON.parse(localStorage.getItem('sesi_kas_sekolah'));
@@ -1145,7 +1145,6 @@ window.addEventListener('DOMContentLoaded', () => {
         if(typeof renderSiswa === 'function') {
             renderSiswa();
         }
-    }
 });
     </script>
     <div id="modal-siswa" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-center justify-center p-4">
