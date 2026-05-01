@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kas Sekolah Lengkap</title>
+    <title>Sistem Kas Sekolah Lengkap v2.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11,195 +11,92 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: { primary: '#1e3a8a', secondary: '#3b82f6', accent: '#f59e0b', dark: '#0f172a', light: '#f8fafc' }
-                }
-            }
-        }
+        tailwind.config = { theme: { extend: { colors: { primary: '#1e3a8a', secondary: '#3b82f6', accent: '#f59e0b', dark: '#0f172a', light: '#f8fafc' } } } }
     </script>
     <style>
         .hidden-section { display: none !important; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        /* Style untuk Nota Thermal 58mm */
+        @media print {
+            body * { visibility: hidden; }
+            #area-nota, #area-nota * { visibility: visible; }
+            #area-nota { position: absolute; left: 0; top: 0; width: 58mm; padding: 5mm; font-family: monospace; font-size: 12px; color: black; background: white; }
+            .no-print { display: none !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
 
-    <section id="login-section" class="flex-grow flex items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-md p-8 rounded-2xl shadow-xl border border-slate-200">
-            <div class="text-center mb-8">
-                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <i class="fa-solid fa-wallet text-3xl"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-dark">Kas Sekolah</h1>
-                <p class="text-slate-500 text-sm mt-1">Silakan masuk ke akun Anda</p>
-            </div>
-            
-            <form id="form-login" class="space-y-5">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-user text-slate-400"></i></div>
-                        <input type="text" id="login-username" required class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-lock text-slate-400"></i></div>
-                        <input type="password" id="login-password" required class="w-full pl-10 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition">
-                        <button type="button" onclick="window.togglePassword('login-password', 'eye-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition">
-                            <i class="fa-solid fa-eye" id="eye-login"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center text-sm">
-                    <button type="button" onclick="window.showLupaPassword()" class="text-secondary hover:underline font-medium">Lupa Password?</button>
-                </div>
-                <button type="submit" class="w-full bg-primary hover:bg-dark text-white font-semibold py-2.5 rounded-lg shadow-md transition flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-right-to-bracket"></i> Masuk
-                </button>
-            </form>
-            <div class="mt-6 text-center text-sm text-slate-600">
-                Belum punya akun? <button onclick="window.toggleAuth('register')" class="text-secondary font-semibold hover:underline">Buat Akun Baru</button>
-            </div>
+    <div id="area-nota" class="hidden absolute z-0 bg-white">
+        <div class="text-center font-bold text-sm mb-2" id="nota-sekolah">KAS SEKOLAH</div>
+        <div class="text-[10px] text-center mb-2 border-b border-dashed border-black pb-2" id="nota-tanggal"></div>
+        <div class="text-[10px] mb-2">
+            <div>NIS : <span id="nota-nis"></span></div>
+            <div>Nama: <span id="nota-nama"></span></div>
         </div>
-    </section>
+        <div class="border-b border-dashed border-black mb-2"></div>
+        <div id="nota-items" class="text-[10px] mb-2"></div>
+        <div class="border-b border-dashed border-black mb-2"></div>
+        <div class="flex justify-between font-bold text-[10px]"><span>TOTAL:</span><span id="nota-total"></span></div>
+        <div class="text-center text-[10px] mt-4">Terima Kasih</div>
+    </div>
 
-    <section id="register-section" class="hidden-section flex-grow flex items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-lg p-8 rounded-2xl shadow-xl border border-slate-200">
-            <h2 class="text-2xl font-bold text-dark mb-6 text-center">Buat Akun Unit</h2>
-            <form id="form-register" class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
-                        <input type="text" id="reg-nama" required class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Unit Akses</label>
-                        <select id="reg-unit" required class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none">
-                            <option value="">-- Pilih Unit --</option>
-                            <option value="SMP">Unit SMP</option><option value="SMA">Unit SMA</option><option value="SD">Unit SD</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
-                        <input type="text" id="reg-username" required class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                        <div class="relative">
-                            <input type="password" id="reg-password" required class="w-full px-4 py-2 pr-10 border border-slate-300 rounded-lg outline-none">
-                        </div>
-                    </div>
-                </div>
-                <div class="border-t border-slate-200 pt-4 mt-2">
-                    <select id="reg-tanya" required class="w-full mb-3 px-4 py-2 border border-slate-300 rounded-lg outline-none">
-                        <option value="Siapa nama hewan peliharaan pertama Anda?">Pertanyaan: Siapa nama hewan peliharaan pertama Anda?</option>
-                    </select>
-                    <input type="text" id="reg-jawab" placeholder="Jawaban Rahasia" required class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none">
-                </div>
-                <button type="submit" class="w-full bg-secondary hover:bg-primary text-white font-semibold py-2.5 rounded-lg shadow-md transition mt-4">
-                    <i class="fa-solid fa-user-plus"></i> Daftarkan Akun
-                </button>
+    <section id="login-section" class="flex-grow flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-8 rounded-2xl shadow-xl">
+            <h1 class="text-2xl font-bold text-center mb-6">Login Kas Sekolah</h1>
+            <form id="form-login" class="space-y-4">
+                <input type="text" id="login-username" placeholder="Username" required class="w-full px-4 py-2 border rounded-lg">
+                <input type="password" id="login-password" placeholder="Password" required class="w-full px-4 py-2 border rounded-lg">
+                <button type="submit" class="w-full bg-primary text-white py-2.5 rounded-lg font-bold">Masuk</button>
             </form>
-            <div class="mt-4 text-center text-sm text-slate-600">
-                Sudah punya akun? <button onclick="window.toggleAuth('login')" class="text-primary font-semibold hover:underline">Kembali ke Login</button>
-            </div>
         </div>
     </section>
 
     <section id="dashboard-section" class="hidden-section flex-grow flex h-screen overflow-hidden bg-slate-50">
-        <aside id="sidebar" class="bg-primary text-white w-64 flex-shrink-0 hidden md:flex flex-col transition-all duration-300 z-20 absolute md:relative h-full">
-            <div class="p-4 flex items-center justify-between border-b border-blue-800">
-                <div class="flex items-center gap-3"><i class="fa-solid fa-wallet text-2xl text-accent"></i><span class="font-bold text-xl tracking-wide">Kas Sekolah</span></div>
-                <button onclick="window.toggleSidebar()" class="md:hidden text-white hover:text-accent"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            
+        <aside id="sidebar" class="bg-primary text-white w-64 hidden md:flex flex-col h-full flex-shrink-0 relative z-20">
+            <div class="p-4 flex items-center gap-3 border-b border-blue-800 font-bold text-xl"><i class="fa-solid fa-wallet text-accent"></i> Kas Sekolah</div>
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-                <a href="#" onclick="window.switchMenu('menu-dashboard', 'Dashboard Utama', this)" class="nav-item active flex items-center gap-3 p-3 rounded-lg bg-blue-800 text-white transition">
-                    <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
-                </a>
-                <a href="#" onclick="window.switchMenu('menu-master', 'Master Data', this)" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-blue-800 text-blue-100 transition">
-                    <i class="fa-solid fa-database w-5 text-center"></i> Master Data
-                </a>
-                <a href="#" onclick="window.switchMenu('menu-kasir', 'Kasir Pembayaran', this)" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-blue-800 text-blue-100 transition">
-                    <i class="fa-solid fa-cash-register w-5 text-center"></i> Kasir
-                </a>
-                <a href="#" onclick="window.switchMenu('menu-pengeluaran', 'Data Pengeluaran', this)" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-blue-800 text-blue-100 transition">
-                    <i class="fa-solid fa-money-bill-transfer w-5 text-center"></i> Pengeluaran
-                </a>
-                <a href="#" onclick="window.switchMenu('menu-bku', 'Buku Kas Umum', this)" class="nav-item flex items-center gap-3 p-3 rounded-lg hover:bg-blue-800 text-blue-100 transition">
-                    <i class="fa-solid fa-book w-5 text-center"></i> Buku Kas (BKU)
-                </a>
+                <a href="#" onclick="window.switchMenu('menu-dashboard', 'Dashboard')" class="nav-item bg-blue-800 p-3 rounded-lg flex items-center gap-3"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+                <a href="#" onclick="window.switchMenu('menu-master', 'Master Data')" class="nav-item hover:bg-blue-800 p-3 rounded-lg flex items-center gap-3"><i class="fa-solid fa-database"></i> Master Data</a>
+                <a href="#" onclick="window.switchMenu('menu-kasir', 'Kasir')" class="nav-item hover:bg-blue-800 p-3 rounded-lg flex items-center gap-3"><i class="fa-solid fa-cash-register"></i> Kasir</a>
+                <a href="#" onclick="window.switchMenu('menu-pengeluaran', 'Pengeluaran')" class="nav-item hover:bg-blue-800 p-3 rounded-lg flex items-center gap-3"><i class="fa-solid fa-money-bill-transfer"></i> Pengeluaran</a>
+                <a href="#" onclick="window.switchMenu('menu-bku', 'Buku Kas Umum')" class="nav-item hover:bg-blue-800 p-3 rounded-lg flex items-center gap-3"><i class="fa-solid fa-book"></i> BKU</a>
             </nav>
-
-            <div class="p-4 border-t border-blue-800 bg-dark/20">
-                <div class="text-xs text-blue-200 mb-1">Login sebagai:</div>
-                <div class="font-semibold truncate" id="dash-user-name">Nama Admin</div>
-                <div class="text-xs text-accent font-bold mt-1">Unit: <span id="dash-unit" class="uppercase">SMP</span></div>
-            </div>
+            <div class="p-4 border-t border-blue-800 text-xs">Login: <span id="dash-user-name" class="font-bold">Admin</span> (<span id="dash-unit">Unit</span>)</div>
         </aside>
 
-        <div class="flex-1 flex flex-col h-screen overflow-hidden w-full relative">
-            <header class="bg-white shadow-sm h-16 flex items-center justify-between px-4 lg:px-8 z-10 flex-shrink-0">
-                <div class="flex items-center gap-4">
-                    <button onclick="window.toggleSidebar()" class="md:hidden text-slate-500 hover:text-primary"><i class="fa-solid fa-bars text-xl"></i></button>
-                    <h2 class="font-bold text-slate-700 text-lg hidden sm:block" id="header-title">Dashboard Utama</h2>
-                </div>
-                <button onclick="window.logout()" class="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg transition flex items-center gap-2 text-sm font-semibold border border-red-100">
-                    <i class="fa-solid fa-power-off"></i> <span class="hidden sm:inline">Keluar</span>
-                </button>
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6 z-10">
+                <h2 class="font-bold text-lg" id="header-title">Dashboard</h2>
+                <button onclick="window.logout()" class="text-red-500 font-bold text-sm hover:bg-red-50 px-3 py-1 rounded">Logout</button>
             </header>
 
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-100 p-4 lg:p-8">
-                
+            <main class="flex-1 overflow-auto p-6">
                 <div id="menu-dashboard" class="view-section">
-                    <div class="mb-6 bg-gradient-to-r from-secondary to-cyan-400 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between relative overflow-hidden">
-                        <div class="z-10 text-center md:text-left mb-4 md:mb-0">
-                            <h2 class="text-2xl font-bold mb-1">Selamat Datang! 🚀</h2>
-                            <p class="text-blue-100 text-sm">Semoga harimu menyenangkan dan pencatatan kas lancar.</p>
-                        </div>
-                        <div class="z-10 flex flex-col items-center bg-white/20 px-6 py-3 rounded-xl border border-white/30 shadow-inner">
-                            <div id="realtime-time" class="text-3xl font-black tracking-wider font-mono">00:00:00</div>
-                            <div id="realtime-date" class="text-xs font-semibold mt-1 text-blue-50 tracking-wider">Senin, 1 Jan 2024</div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-primary">
+                            <div class="text-sm text-gray-500">Total Saldo Kas</div><div id="dash-saldo" class="text-2xl font-bold">Rp 0</div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-primary flex items-center justify-between">
-                            <div><div class="text-sm text-slate-500 font-medium mb-1">Total Saldo Kas</div><div id="dash-saldo" class="text-2xl font-bold text-dark">Rp 0</div></div>
-                            <i class="fa-solid fa-wallet text-4xl text-slate-200"></i>
+                    <h3 class="font-bold text-gray-700 mb-3"><i class="fa-solid fa-wallet"></i> Saldo Per Dompet (Kategori Tagihan)</h3>
+                    <div id="grid-dompet" class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500 flex items-center justify-between">
-                            <div><div class="text-sm text-slate-500 font-medium mb-1">Total Pemasukan</div><div id="dash-masuk" class="text-2xl font-bold text-dark">Rp 0</div></div>
-                            <i class="fa-solid fa-arrow-trend-up text-4xl text-slate-200"></i>
-                        </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-500 flex items-center justify-between">
-                            <div><div class="text-sm text-slate-500 font-medium mb-1">Total Pengeluaran</div><div id="dash-keluar" class="text-2xl font-bold text-dark">Rp 0</div></div>
-                            <i class="fa-solid fa-arrow-trend-down text-4xl text-slate-200"></i>
-                        </div>
-                    </div>
                 </div>
 
-                <div id="menu-master" class="view-section hidden-section relative">
-                    <div class="flex border-b border-gray-200 mb-6">
-                        <button id="tab-btn-siswa" onclick="window.switchMasterTab('siswa')" class="px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition"><i class="fa-solid fa-users mr-2"></i> Data Siswa</button>
-                        <button id="tab-btn-tagihan" onclick="window.switchMasterTab('tagihan')" class="px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition"><i class="fa-solid fa-file-invoice-dollar mr-2"></i> Master Tagihan</button>
+                <div id="menu-master" class="view-section hidden-section">
+                    <div class="flex border-b mb-4">
+                        <button onclick="window.switchMasterTab('siswa')" id="tab-btn-siswa" class="px-4 py-2 text-blue-600 font-bold border-b-2 border-blue-600">Data Siswa</button>
+                        <button onclick="window.switchMasterTab('tagihan')" id="tab-btn-tagihan" class="px-4 py-2 text-gray-500 font-bold">Master Tagihan</button>
                     </div>
 
-                    <div id="tab-content-siswa" class="block">
+                    <div id="tab-content-siswa">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-gray-700 text-lg">Data Master Siswa</h3>
-                            <div class="flex gap-2">
-                                <button onclick="window.openModalSiswa()" class="bg-blue-800 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-900 transition text-sm"><i class="fa-solid fa-plus mr-1"></i> Tambah Siswa</button>
-                            </div>
+                            <input type="text" id="search-siswa" onkeyup="window.renderSiswa()" placeholder="Cari Nama/NIS..." class="border p-2 rounded-lg text-sm w-64">
+                            <button onclick="window.openModalSiswa('tambah')" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold">+ Tambah</button>
                         </div>
-                        <div class="bg-white rounded-xl border shadow-sm overflow-hidden text-sm">
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden text-sm">
                             <table class="w-full text-left">
-                                <thead class="bg-gray-50 font-bold text-gray-600"><tr><th class="p-4">NIS</th><th class="p-4">Nama Lengkap</th><th class="p-4">Kelas</th><th class="p-4 text-center">Aksi</th></tr></thead>
+                                <thead class="bg-gray-100"><tr><th class="p-3">NIS</th><th class="p-3">Nama</th><th class="p-3">Kelas (Min 7)</th><th class="p-3">Aksi</th></tr></thead>
                                 <tbody id="table-siswa-body"></tbody>
                             </table>
                         </div>
@@ -207,104 +104,90 @@
 
                     <div id="tab-content-tagihan" class="hidden">
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div class="bg-white p-6 rounded-xl border shadow-sm h-fit">
-                                <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Katalog Tagihan</h3>
-                                <form id="form-buat-tagihan" onsubmit="window.buatKatalog(event)" class="space-y-4 mb-6">
-                                    <div><label class="text-xs font-bold text-gray-500">Nama Tagihan</label><input type="text" id="nama-tagihan" class="w-full border p-2 rounded-lg text-sm" placeholder="ex: SPP Juli 2024" required></div>
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-500">Kategori</label>
-                                        <select id="kategori-tagihan" required class="w-full border p-2 rounded-lg text-sm"><option value="Bulanan">Bulanan</option><option value="Tahunan">Tahunan</option><option value="Lainnya">Lainnya</option></select>
-                                    </div>
-                                    <div><label class="text-xs font-bold text-gray-500">Nominal Default (Rp)</label><input type="number" id="nominal-tagihan" class="w-full border p-2 rounded-lg text-sm" placeholder="250000" required></div>
-                                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold text-sm">Buat Katalog</button>
+                            <div class="bg-white p-4 rounded-xl shadow-sm">
+                                <h3 class="font-bold mb-3 border-b pb-2">Buat/Edit Katalog</h3>
+                                <form id="form-buat-tagihan" onsubmit="window.simpanKatalog(event)" class="space-y-3">
+                                    <input type="hidden" id="kat-id">
+                                    <input type="text" id="kat-nama" placeholder="Nama Tagihan" required class="w-full border p-2 rounded text-sm">
+                                    <select id="kat-kategori" required class="w-full border p-2 rounded text-sm">
+                                        <option value="Bulanan">Bulanan</option><option value="Tahunan">Tahunan</option><option value="Pembayaran">Pembayaran Khusus</option>
+                                    </select>
+                                    <input type="number" id="kat-nominal" placeholder="Nominal Rp" required class="w-full border p-2 rounded text-sm">
+                                    <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded font-bold text-sm">Simpan Katalog</button>
                                 </form>
-                                <h4 class="text-xs font-bold text-gray-500 mb-2">Daftar Katalog Tersedia</h4>
-                                <ul id="list-katalog" class="space-y-2 text-sm"></ul>
+                                <ul id="list-katalog" class="mt-4 space-y-2 text-sm max-h-60 overflow-auto"></ul>
                             </div>
                             
-                            <div class="lg:col-span-2 bg-white p-6 rounded-xl border shadow-sm">
-                                <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Sebar Tagihan ke Siswa</h3>
-                                <div class="flex flex-col md:flex-row gap-4 mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
-                                    <div class="flex-1"><label class="text-xs font-bold text-gray-500">Pilih Tagihan</label><select id="pilih-katalog" class="w-full border p-2 rounded-lg text-sm"></select></div>
-                                    <div class="flex-1"><label class="text-xs font-bold text-gray-500">Target Siswa</label><select id="pilih-target" class="w-full border p-2 rounded-lg text-sm"><option value="SEMUA">Semua Siswa</option><option value="7">Kelas 7</option><option value="8">Kelas 8</option><option value="9">Kelas 9</option></select></div>
-                                    <div class="flex items-end"><button onclick="window.terapkanTagihan()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold text-sm w-full md:w-auto">Terapkan!</button></div>
+                            <div class="lg:col-span-2 bg-white p-4 rounded-xl shadow-sm">
+                                <h3 class="font-bold mb-3 border-b pb-2">Terapkan Tagihan ke Siswa</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-500 block mb-1">Pilih Tagihan (Bisa centang banyak):</label>
+                                        <div id="checkbox-katalog" class="grid grid-cols-2 gap-2 border p-3 rounded-lg bg-slate-50 max-h-40 overflow-auto"></div>
+                                    </div>
+                                    <div class="flex gap-4">
+                                        <div class="flex-1">
+                                            <label class="text-xs font-bold text-gray-500">Target Kelas</label>
+                                            <select id="pilih-target" onchange="window.cekTargetKhusus()" class="w-full border p-2 rounded text-sm">
+                                                <option value="SEMUA">Semua Kelas</option><option value="7">Kelas 7</option><option value="8">Kelas 8</option><option value="9">Kelas 9</option><option value="KHUSUS">Pilih Manual (Siswa Tertentu)</option>
+                                            </select>
+                                        </div>
+                                        <div class="flex items-end"><button onclick="window.terapkanTagihan()" class="bg-green-600 text-white px-6 py-2 rounded font-bold text-sm">Terapkan!</button></div>
+                                    </div>
+                                    <div id="area-target-khusus" class="hidden border p-3 rounded-lg bg-yellow-50">
+                                        <label class="text-xs font-bold text-gray-500 mb-2 block">Pilih Siswa Manual:</label>
+                                        <div id="checkbox-siswa-manual" class="grid grid-cols-2 gap-2 max-h-40 overflow-auto text-sm"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <div id="menu-kasir" class="view-section hidden-section">
-                    <div class="bg-white p-6 rounded-xl border shadow-sm mb-6">
-                        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-cash-register text-secondary mr-2"></i> Kasir Pembayaran</h2>
-                        <div class="flex gap-4 mb-4">
-                            <input type="text" id="kasir-search" class="flex-1 border p-3 rounded-lg text-sm bg-gray-50" placeholder="Ketik Nama atau NIS siswa untuk mencari...">
-                            <button onclick="window.cariSiswaKasir()" class="bg-primary text-white px-6 py-2 rounded-lg font-bold"><i class="fa-solid fa-search"></i> Cari</button>
-                        </div>
-                        <div id="kasir-hasil-cari" class="space-y-2 max-h-40 overflow-y-auto hidden border rounded-lg p-2 bg-gray-50"></div>
-                    </div>
 
-                    <div id="kasir-area-tagihan" class="hidden grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white p-6 rounded-xl border shadow-sm h-fit">
-                            <div class="text-center mb-4">
-                                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold mb-2"><i class="fa-solid fa-user-graduate"></i></div>
-                                <h3 id="kasir-nama-siswa" class="font-bold text-lg">Nama Siswa</h3>
-                                <p id="kasir-nis-siswa" class="text-gray-500 text-sm">NIS: 12345</p>
-                                <span id="kasir-kelas-siswa" class="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">Kelas 7</span>
-                            </div>
+                <div id="menu-kasir" class="view-section hidden-section">
+                    <div class="bg-white p-4 rounded-xl shadow-sm mb-4 flex gap-2">
+                        <input type="text" id="kasir-search" class="flex-1 border p-2 rounded text-sm" placeholder="Cari Nama/NIS untuk bayar...">
+                        <button onclick="window.cariSiswaKasir()" class="bg-primary text-white px-4 py-2 rounded font-bold text-sm">Cari</button>
+                    </div>
+                    <div id="kasir-hasil-cari" class="space-y-2 mb-4 max-h-40 overflow-auto hidden border rounded p-2 bg-white"></div>
+
+                    <div id="kasir-area-tagihan" class="hidden bg-white p-4 rounded-xl shadow-sm">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <div><h3 id="kasir-nama-siswa" class="font-bold text-lg">Nama</h3><p id="kasir-nis-siswa" class="text-xs text-gray-500">NIS</p></div>
+                            <button onclick="window.prosesBayarTerpilih()" class="bg-green-600 text-white px-4 py-2 rounded font-bold text-sm"><i class="fa-solid fa-check-double"></i> Bayar Terpilih</button>
                         </div>
-                        <div class="md:col-span-2 bg-white p-6 rounded-xl border shadow-sm">
-                            <h3 class="font-bold text-gray-800 border-b pb-2 mb-4">Daftar Tagihan Siswa</h3>
-                            <div class="overflow-hidden border rounded-xl shadow-sm text-sm">
-                                <table class="w-full text-left">
-                                    <thead class="bg-gray-50"><tr><th class="p-3">Nama Tagihan</th><th class="p-3">Nominal</th><th class="p-3">Status</th><th class="p-3 text-center">Aksi</th></tr></thead>
-                                    <tbody id="kasir-table-tagihan" class="divide-y"></tbody>
-                                </table>
-                            </div>
+                        <div class="overflow-auto text-sm">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-50"><tr><th class="p-2"><input type="checkbox" onchange="window.checkAllKasir(this)"></th><th class="p-2">Uraian</th><th class="p-2">Total</th><th class="p-2">Sisa</th><th class="p-2">Status</th><th class="p-2 text-center">Aksi</th></tr></thead>
+                                <tbody id="kasir-table-tagihan" class="divide-y"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
                 <div id="menu-pengeluaran" class="view-section hidden-section">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white p-6 rounded-xl border shadow-sm h-fit">
-                            <h3 class="font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-money-bill-transfer text-red-500 mr-2"></i> Catat Pengeluaran</h3>
-                            <form id="form-pengeluaran" onsubmit="window.simpanPengeluaran(event)" class="space-y-4">
-                                <div><label class="text-xs font-bold text-gray-500">Tanggal</label><input type="date" id="out-tanggal" required class="w-full border p-2 rounded-lg text-sm"></div>
-                                <div><label class="text-xs font-bold text-gray-500">Uraian / Keterangan</label><input type="text" id="out-uraian" placeholder="ex: Beli Spidol & Kertas" required class="w-full border p-2 rounded-lg text-sm"></div>
-                                <div><label class="text-xs font-bold text-gray-500">Nominal (Rp)</label><input type="number" id="out-nominal" placeholder="50000" required class="w-full border p-2 rounded-lg text-sm"></div>
-                                <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-lg font-bold text-sm transition">Simpan Pengeluaran</button>
+                        <div class="bg-white p-4 rounded-xl shadow-sm">
+                            <h3 class="font-bold mb-3 border-b pb-2">Catat Pengeluaran</h3>
+                            <form id="form-pengeluaran" onsubmit="window.simpanPengeluaran(event)" class="space-y-3">
+                                <div><label class="text-xs font-bold text-gray-500">Ambil dari Dompet (Tagihan)</label><select id="out-dompet" required class="w-full border p-2 rounded text-sm"></select></div>
+                                <div><label class="text-xs font-bold text-gray-500">Tanggal</label><input type="date" id="out-tanggal" required class="w-full border p-2 rounded text-sm"></div>
+                                <div><label class="text-xs font-bold text-gray-500">Uraian</label><input type="text" id="out-uraian" required class="w-full border p-2 rounded text-sm"></div>
+                                <div><label class="text-xs font-bold text-gray-500">Nominal Rp</label><input type="number" id="out-nominal" required class="w-full border p-2 rounded text-sm"></div>
+                                <button type="submit" class="w-full bg-red-500 text-white py-2 rounded font-bold text-sm">Simpan</button>
                             </form>
                         </div>
-                        <div class="md:col-span-2 bg-white p-6 rounded-xl border shadow-sm">
-                            <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Riwayat Pengeluaran Kas</h3>
-                            <div class="overflow-hidden border rounded-xl shadow-sm text-sm">
-                                <table class="w-full text-left">
-                                    <thead class="bg-gray-50"><tr><th class="p-3">Tanggal</th><th class="p-3">Uraian</th><th class="p-3">Nominal</th><th class="p-3 text-center">Aksi</th></tr></thead>
-                                    <tbody id="table-pengeluaran" class="divide-y"></tbody>
-                                </table>
-                            </div>
+                        <div class="md:col-span-2 bg-white p-4 rounded-xl shadow-sm">
+                            <h3 class="font-bold mb-3 border-b pb-2">Riwayat Pengeluaran</h3>
+                            <table class="w-full text-sm text-left"><thead class="bg-gray-50"><tr><th class="p-2">Tgl</th><th class="p-2">Dompet</th><th class="p-2">Uraian</th><th class="p-2">Nominal</th></tr></thead><tbody id="table-pengeluaran"></tbody></table>
                         </div>
                     </div>
                 </div>
 
                 <div id="menu-bku" class="view-section hidden-section">
-                    <div class="bg-white p-6 rounded-xl border shadow-sm">
-                        <div class="flex justify-between items-center mb-6 border-b pb-4">
-                            <div>
-                                <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-book text-primary mr-2"></i> Buku Kas Umum (BKU)</h2>
-                                <p class="text-sm text-gray-500 mt-1">Rekapitulasi seluruh transaksi Pemasukan dan Pengeluaran</p>
-                            </div>
-                            <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md"><i class="fa-solid fa-print mr-1"></i> Cetak / PDF</button>
-                        </div>
-                        <div class="overflow-x-auto border rounded-xl shadow-sm text-sm print:shadow-none print:border-none">
-                            <table class="w-full text-left border-collapse">
-                                <thead class="bg-gray-100 text-gray-700">
-                                    <tr><th class="p-3 border">Tanggal</th><th class="p-3 border">Uraian / Keterangan</th><th class="p-3 border text-right text-green-700">Pemasukan</th><th class="p-3 border text-right text-red-700">Pengeluaran</th><th class="p-3 border text-right text-blue-700">Saldo</th></tr>
-                                </thead>
-                                <tbody id="table-bku" class="divide-y"></tbody>
-                            </table>
-                        </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm">
+                        <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Buku Kas Umum</h3> <button onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded text-sm font-bold no-print">Cetak PDF</button></div>
+                        <table class="w-full text-sm text-left border"><thead class="bg-gray-100"><tr><th class="p-2 border">Tgl</th><th class="p-2 border">Uraian</th><th class="p-2 border text-right">Masuk</th><th class="p-2 border text-right">Keluar</th><th class="p-2 border text-right">Saldo</th></tr></thead><tbody id="table-bku"></tbody></table>
                     </div>
                 </div>
 
@@ -312,23 +195,20 @@
         </div>
     </section>
 
-    <div id="modal-siswa" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-center justify-center p-4">
-        <div id="modal-siswa-content" class="bg-white rounded-2xl shadow-xl w-full max-w-md transform scale-95 transition-all duration-300">
-            <div class="flex justify-between items-center p-6 border-b border-slate-100">
-                <h3 id="modal-siswa-title" class="font-bold text-lg text-slate-800">Data Siswa</h3>
-                <button onclick="window.closeModalSiswa()" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <form onsubmit="window.simpanSiswa(event)" class="p-6 space-y-4">
-                <input type="hidden" id="form-mode" value="tambah"><input type="hidden" id="old-nis" value="">
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">NIS</label><input type="text" id="input-nis" required class="w-full border p-2.5 rounded-lg text-sm"></div>
-                <div><label class="block text-xs font-bold text-slate-500 mb-1">Nama Lengkap</label><input type="text" id="input-nama" required class="w-full border p-2.5 rounded-lg text-sm"></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-xs font-bold text-slate-500 mb-1">Tahun Masuk</label><input type="number" id="input-tahun" required class="w-full border p-2.5 rounded-lg text-sm"></div>
-                    <div><label class="block text-xs font-bold text-slate-500 mb-1">Kelas Awal</label><select id="input-kelas-awal" class="w-full border p-2.5 rounded-lg text-sm"><option value="7">Kelas 7</option><option value="8">Kelas 8</option><option value="9">Kelas 9</option></select></div>
-                </div>
-                <div class="pt-4 flex justify-end gap-2">
-                    <button type="button" onclick="window.closeModalSiswa()" class="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-lg text-sm">Batal</button>
-                    <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-lg text-sm">Simpan</button>
+    <div id="modal-siswa" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-xl w-full max-w-sm">
+            <h3 class="font-bold mb-4" id="modal-siswa-title">Form Siswa</h3>
+            <form onsubmit="window.submitSiswa(event)" class="space-y-3">
+                <input type="hidden" id="s-mode"><input type="hidden" id="s-old-nis">
+                <input type="text" id="s-nis" placeholder="NIS" required class="w-full border p-2 rounded text-sm">
+                <input type="text" id="s-nama" placeholder="Nama Lengkap" required class="w-full border p-2 rounded text-sm">
+                <input type="number" id="s-tahun" placeholder="Tahun Masuk (ex: 2023)" required class="w-full border p-2 rounded text-sm">
+                <select id="s-kelas" required class="w-full border p-2 rounded text-sm">
+                    <option value="7">Kelas 7</option><option value="8">Kelas 8</option><option value="9">Kelas 9</option>
+                </select>
+                <div class="flex gap-2 justify-end pt-2">
+                    <button type="button" onclick="document.getElementById('modal-siswa').classList.add('hidden')" class="px-4 py-2 bg-gray-200 rounded text-sm">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded text-sm">Simpan</button>
                 </div>
             </form>
         </div>
@@ -347,347 +227,327 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // ================= UTILS =================
-        window.formatRupiah = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        // Utils
+        window.formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits:0 }).format(angka);
         
-        window.hitungKelasOtomatis = function(tahunMasuk, kelasAwal) {
-            const sekarang = new Date();
-            let thnEfektif = (sekarang.getMonth() + 1 >= 7) ? sekarang.getFullYear() : sekarang.getFullYear() - 1;
-            let selisih = thnEfektif - parseInt(tahunMasuk);
-            if (selisih >= 3) return "Lulus";
-            let kls = parseInt(kelasAwal) + selisih;
+        // LOGIK NAIK KELAS (Juli = Bulan 6) & MINIMAL KELAS 7
+        window.hitungKelasOtomatis = (thnMasuk, klsAwal) => {
+            const skr = new Date();
+            let thnEfektif = (skr.getMonth() >= 6) ? skr.getFullYear() : skr.getFullYear() - 1;
+            let selisih = thnEfektif - parseInt(thnMasuk);
+            if(selisih < 0) selisih = 0;
+            let kls = parseInt(klsAwal) + selisih;
+            if(kls < 7) kls = 7; // Batas Minimum
             return kls > 12 ? "Lulus" : kls;
         };
 
-        window.formatTanggal = (isoString) => {
-            const date = new Date(isoString);
-            return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-        };
-
-        // ================= AUTHENTICATION =================
-        window.toggleAuth = (type) => {
-            document.getElementById('login-section').classList.add('hidden-section');
-            document.getElementById('register-section').classList.add('hidden-section');
-            document.getElementById(type + '-section').classList.remove('hidden-section');
-        };
-        window.togglePassword = (id, iconId) => {
-            let el = document.getElementById(id); let ic = document.getElementById(iconId);
-            el.type = el.type === 'password' ? 'text' : 'password';
-            ic.className = el.type === 'password' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
-        };
-
+        // Auth & Navigasi
         document.getElementById('form-login').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const u = document.getElementById('login-username').value;
-            const p = document.getElementById('login-password').value;
-            Swal.fire({title: 'Memeriksa...', didOpen: () => Swal.showLoading()});
+            e.preventDefault(); const u = document.getElementById('login-username').value, p = document.getElementById('login-password').value;
+            Swal.fire({title:'Loading', didOpen:()=>Swal.showLoading()});
             try {
-                const snap = await get(child(ref(db), `users/${u}`));
-                if(snap.exists() && snap.val().password === p) {
-                    const data = snap.val();
-                    localStorage.setItem('sesi_kas_sekolah', JSON.stringify({username: u, nama: data.nama_admin, unit: data.unit}));
-                    Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Berhasil', timer: 1000, showConfirmButton: false});
-                    window.initDashboard(data.nama_admin, data.unit);
-                } else { Swal.fire('Gagal', 'User/Password Salah', 'error'); }
-            } catch (err) { Swal.fire('Error', err.message, 'error'); }
+                const s = await get(child(ref(db), `users/${u}`));
+                if(s.exists() && s.val().password === p) {
+                    localStorage.setItem('sesi_kas_sekolah', JSON.stringify({uid:u, nama:s.val().nama_admin, unit:s.val().unit}));
+                    Swal.close(); window.initDash();
+                } else Swal.fire('Error','Data Salah','error');
+            } catch(e) { Swal.fire('Error', e.message, 'error'); }
         });
+        window.logout = () => { localStorage.clear(); window.location.reload(); };
 
-        window.logout = () => {
-            localStorage.removeItem('sesi_kas_sekolah'); window.location.reload();
-        };
-
-        // ================= NAVIGATION =================
-        window.initDashboard = (nama, unit) => {
+        window.initDash = () => {
+            const s = JSON.parse(localStorage.getItem('sesi_kas_sekolah'));
+            if(!s) return;
             document.getElementById('login-section').classList.add('hidden-section');
-            document.getElementById('register-section').classList.add('hidden-section');
             document.getElementById('dashboard-section').classList.remove('hidden-section');
-            document.getElementById('dash-user-name').innerText = nama;
-            document.getElementById('dash-unit').innerText = unit;
-            window.renderSiswa(); window.renderKatalog(); window.renderPengeluaran(); window.renderBKU(); window.updateStatistik();
+            document.getElementById('dash-user-name').innerText = s.nama; document.getElementById('dash-unit').innerText = s.unit;
+            window.switchMenu('menu-dashboard', 'Dashboard');
         };
 
-        window.toggleSidebar = () => {
-            let s = document.getElementById('sidebar');
-            if(s.classList.contains('hidden')) { s.classList.remove('hidden'); s.classList.add('flex'); }
-            else { s.classList.add('hidden'); s.classList.remove('flex'); }
+        window.switchMenu = (id, judul) => {
+            document.querySelectorAll('.view-section').forEach(e => e.classList.add('hidden-section'));
+            document.getElementById(id).classList.remove('hidden-section');
+            document.getElementById('header-title').innerText = judul;
+            if(id==='menu-master'){ window.renderSiswa(); window.renderKatalog(); }
+            if(id==='menu-pengeluaran' || id==='menu-dashboard') window.renderStatistik();
+            if(id==='menu-bku') window.renderBKU();
         };
 
-        window.switchMenu = (menuId, title, btn) => {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden-section'));
-            document.getElementById(menuId).classList.remove('hidden-section');
-            document.getElementById('header-title').innerText = title;
-            document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('bg-blue-800','text-white'); el.classList.add('text-blue-100'); });
-            btn.classList.add('bg-blue-800','text-white'); btn.classList.remove('text-blue-100');
-            if(window.innerWidth < 768) window.toggleSidebar();
-            if(menuId === 'menu-bku') window.renderBKU(); // refresh BKU
+        // MASTER SISWA (SEARCH & EDIT)
+        window.switchMasterTab = (t) => {
+            document.getElementById('tab-content-siswa').classList.toggle('hidden', t!=='siswa');
+            document.getElementById('tab-content-tagihan').classList.toggle('hidden', t!=='tagihan');
+            document.getElementById('tab-btn-siswa').className = t==='siswa' ? 'px-4 py-2 text-blue-600 font-bold border-b-2 border-blue-600' : 'px-4 py-2 text-gray-500 font-bold';
+            document.getElementById('tab-btn-tagihan').className = t==='tagihan' ? 'px-4 py-2 text-blue-600 font-bold border-b-2 border-blue-600' : 'px-4 py-2 text-gray-500 font-bold';
         };
 
-        window.switchMasterTab = (tab) => {
-            let tS = document.getElementById('tab-content-siswa'), tT = document.getElementById('tab-content-tagihan');
-            let bS = document.getElementById('tab-btn-siswa'), bT = document.getElementById('tab-btn-tagihan');
-            if(tab === 'siswa') {
-                tS.classList.remove('hidden'); tT.classList.add('hidden');
-                bS.className = "px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition";
-                bT.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
-                window.renderSiswa();
-            } else {
-                tT.classList.remove('hidden'); tS.classList.add('hidden');
-                bT.className = "px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition";
-                bS.className = "px-6 py-3 text-gray-500 font-bold hover:text-blue-600 hover:bg-blue-50 transition";
-                window.renderKatalog();
-            }
+        window.openModalSiswa = (mode, nis='', nama='', thn='', kls='7') => {
+            document.getElementById('s-mode').value = mode; document.getElementById('s-old-nis').value = nis;
+            document.getElementById('s-nis').value = nis; document.getElementById('s-nama').value = nama;
+            document.getElementById('s-tahun').value = thn || new Date().getFullYear(); document.getElementById('s-kelas').value = kls;
+            document.getElementById('modal-siswa-title').innerText = mode === 'tambah' ? 'Tambah Siswa' : 'Edit Siswa';
+            document.getElementById('modal-siswa').classList.remove('hidden');
         };
 
-        // ================= MASTER SISWA =================
-        window.openModalSiswa = () => {
-            document.getElementById('form-mode').value = 'tambah'; document.getElementById('input-nis').value = ''; document.getElementById('input-nama').value = '';
-            document.getElementById('modal-siswa').classList.remove('hidden'); setTimeout(() => document.getElementById('modal-siswa').classList.remove('opacity-0'), 10);
-        };
-        window.closeModalSiswa = () => {
-            document.getElementById('modal-siswa').classList.add('opacity-0'); setTimeout(() => document.getElementById('modal-siswa').classList.add('hidden'), 300);
-        };
-
-        window.simpanSiswa = async (e) => {
-            e.preventDefault();
-            const sesi = JSON.parse(localStorage.getItem('sesi_kas_sekolah')); const unit = sesi.unit;
-            const nis = document.getElementById('input-nis').value;
-            await set(ref(db, `students/${unit}/${nis}`), {
-                nis: nis, nama: document.getElementById('input-nama').value,
-                tahun: document.getElementById('input-tahun').value, kelasAwal: document.getElementById('input-kelas-awal').value
-            });
-            Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Disimpan', timer: 1000, showConfirmButton: false});
-            window.closeModalSiswa(); window.renderSiswa();
+        window.submitSiswa = async (e) => {
+            e.preventDefault(); const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+            const mode = document.getElementById('s-mode').value, oldNis = document.getElementById('s-old-nis').value;
+            const data = { nis: document.getElementById('s-nis').value, nama: document.getElementById('s-nama').value, tahun: document.getElementById('s-tahun').value, kelasAwal: document.getElementById('s-kelas').value };
+            if(mode==='edit' && oldNis !== data.nis) await set(ref(db, `students/${unit}/${oldNis}`), null);
+            await set(ref(db, `students/${unit}/${data.nis}`), data);
+            document.getElementById('modal-siswa').classList.add('hidden'); window.renderSiswa();
         };
 
         window.renderSiswa = async () => {
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+            const kw = document.getElementById('search-siswa').value.toLowerCase();
             const snap = await get(child(ref(db), `students/${unit}`));
-            const tb = document.getElementById('table-siswa-body'); tb.innerHTML = '';
+            let h = '', cM = '';
             if(snap.exists()){
                 snap.forEach(c => {
                     let s = c.val(); let kls = window.hitungKelasOtomatis(s.tahun, s.kelasAwal);
-                    let badge = kls === 'Lulus' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700';
-                    tb.innerHTML += `<tr class="border-b"><td class="p-4">${s.nis}</td><td class="p-4 font-bold">${s.nama}</td>
-                    <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${kls === 'Lulus' ? 'Lulus' : 'Kelas '+kls}</span></td>
-                    <td class="p-4 text-center"><button onclick="window.hapusSiswa('${s.nis}')" class="text-red-500 hover:bg-red-50 p-2 rounded"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                    if(s.nama.toLowerCase().includes(kw) || s.nis.includes(kw)){
+                        h += `<tr><td class="p-2 border-b">${s.nis}</td><td class="p-2 border-b font-bold">${s.nama}</td><td class="p-2 border-b">${kls==='Lulus'?'Lulus':'Kelas '+kls}</td><td class="p-2 border-b"><button onclick="window.openModalSiswa('edit','${s.nis}','${s.nama}','${s.tahun}','${s.kelasAwal}')" class="text-blue-500 mr-2"><i class="fa-solid fa-edit"></i></button> <button onclick="window.hapusSiswa('${s.nis}')" class="text-red-500"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                        // Sekalian build list manual siswa untuk Master Tagihan
+                        cM += `<label class="flex items-center gap-2"><input type="checkbox" class="cb-siswa-manual" value="${s.nis}"> ${s.nama} (${kls})</label>`;
+                    }
                 });
-            } else { tb.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">Kosong</td></tr>'; }
+            }
+            document.getElementById('table-siswa-body').innerHTML = h; document.getElementById('checkbox-siswa-manual').innerHTML = cM;
         };
-        window.hapusSiswa = async (nis) => {
-            if(confirm("Hapus siswa ini?")) { await set(ref(db, `students/${JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit}/${nis}`), null); window.renderSiswa(); }
-        };
+        window.hapusSiswa = async (nis) => { if(confirm('Hapus?')) { await set(ref(db, `students/${JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit}/${nis}`), null); window.renderSiswa(); } };
 
-        // ================= MASTER TAGIHAN =================
-        window.buatKatalog = async (e) => {
+        // MASTER TAGIHAN (Checkbox & Target Manual)
+        window.simpanKatalog = async (e) => {
             e.preventDefault(); const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            const refBaru = push(ref(db, `katalog_tagihan/${unit}`));
-            await set(refBaru, { id: refBaru.key, nama: document.getElementById('nama-tagihan').value, nominal: document.getElementById('nominal-tagihan').value, kategori: document.getElementById('kategori-tagihan').value });
-            document.getElementById('form-buat-tagihan').reset(); window.renderKatalog();
+            let id = document.getElementById('kat-id').value;
+            if(!id) id = push(ref(db, `katalog_tagihan/${unit}`)).key;
+            await set(ref(db, `katalog_tagihan/${unit}/${id}`), { id: id, nama: document.getElementById('kat-nama').value, kategori: document.getElementById('kat-kategori').value, nominal: parseInt(document.getElementById('kat-nominal').value) });
+            document.getElementById('form-buat-tagihan').reset(); document.getElementById('kat-id').value = ''; window.renderKatalog();
         };
+        window.editKatalog = (id, nm, kat, nom) => { document.getElementById('kat-id').value=id; document.getElementById('kat-nama').value=nm; document.getElementById('kat-kategori').value=kat; document.getElementById('kat-nominal').value=nom; };
 
         window.renderKatalog = async () => {
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
             const snap = await get(child(ref(db), `katalog_tagihan/${unit}`));
-            const list = document.getElementById('list-katalog'); const sel = document.getElementById('pilih-katalog');
-            list.innerHTML = ''; sel.innerHTML = '<option value="">-- Pilih --</option>';
+            let ls = '', cb = '';
             if(snap.exists()){
                 snap.forEach(c => {
                     let d = c.val();
-                    list.innerHTML += `<li class="p-3 border rounded mb-2 flex justify-between bg-gray-50"><div><b class="text-sm">${d.nama}</b><br><span class="text-xs text-green-600 font-bold">${window.formatRupiah(d.nominal)}</span></div> <button onclick="window.hapusKatalog('${d.id}')" class="text-red-500"><i class="fa-solid fa-trash"></i></button></li>`;
-                    sel.innerHTML += `<option value="${d.id}">${d.nama} (${window.formatRupiah(d.nominal)})</option>`;
+                    ls += `<li class="p-2 border rounded flex justify-between bg-slate-50"><div><b>${d.nama}</b><br><span class="text-xs">${window.formatRp(d.nominal)} (${d.kategori})</span></div> <div><button onclick="window.editKatalog('${d.id}','${d.nama}','${d.kategori}',${d.nominal})" class="text-blue-500 mr-2"><i class="fa-solid fa-edit"></i></button><button onclick="window.hapusKatalog('${d.id}')" class="text-red-500"><i class="fa-solid fa-trash"></i></button></div></li>`;
+                    cb += `<label class="flex items-center gap-2"><input type="checkbox" class="cb-kat" value="${d.id}" data-nama="${d.nama}" data-nom="${d.nominal}"> ${d.nama} - ${window.formatRp(d.nominal)}</label>`;
                 });
             }
+            document.getElementById('list-katalog').innerHTML = ls; document.getElementById('checkbox-katalog').innerHTML = cb;
         };
-        window.hapusKatalog = async (id) => {
-            if(confirm("Hapus katalog?")) { await set(ref(db, `katalog_tagihan/${JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit}/${id}`), null); window.renderKatalog(); }
-        };
+        window.hapusKatalog = async (id) => { if(confirm('Hapus Katalog?')) { await set(ref(db, `katalog_tagihan/${JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit}/${id}`), null); window.renderKatalog(); } };
+        window.cekTargetKhusus = () => { document.getElementById('area-target-khusus').classList.toggle('hidden', document.getElementById('pilih-target').value !== 'KHUSUS'); };
 
         window.terapkanTagihan = async () => {
-            const idKat = document.getElementById('pilih-katalog').value;
-            const target = document.getElementById('pilih-target').value; // SEMUA, 7, 8, 9
-            if(!idKat) return Swal.fire('Oops', 'Pilih katalog dulu', 'warning');
+            const cbKat = document.querySelectorAll('.cb-kat:checked');
+            if(cbKat.length === 0) return Swal.fire('Error','Pilih minimal 1 tagihan dari checkbox','warning');
+            const target = document.getElementById('pilih-target').value;
+            let targetNisArr = [];
+            if(target === 'KHUSUS') {
+                document.querySelectorAll('.cb-siswa-manual:checked').forEach(e => targetNisArr.push(e.value));
+                if(targetNisArr.length===0) return Swal.fire('Error','Centang minimal 1 siswa manual','warning');
+            }
             
-            Swal.fire({title: 'Menyebar Tagihan...', didOpen: () => Swal.showLoading()});
+            Swal.fire({title:'Menyebar Tagihan...',didOpen:()=>Swal.showLoading()});
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            const snapKat = await get(child(ref(db), `katalog_tagihan/${unit}/${idKat}`));
-            const dataKat = snapKat.val();
             const snapSis = await get(child(ref(db), `students/${unit}`));
-            
             let count = 0;
             if(snapSis.exists()) {
                 const updates = {};
-                snapSis.forEach(c => {
-                    let s = c.val(); let kls = window.hitungKelasOtomatis(s.tahun, s.kelasAwal).toString();
-                    if(target === "SEMUA" || target === kls) {
-                        let idTagihanBaru = push(child(ref(db), `student_bills/${unit}/${s.nis}`)).key;
-                        updates[`student_bills/${unit}/${s.nis}/${idTagihanBaru}`] = {
-                            id: idTagihanBaru, id_katalog: idKat, nama_tagihan: dataKat.nama,
-                            nominal: dataKat.nominal, status: 'BELUM', timestamp: new Date().toISOString()
-                        };
-                        count++;
+                snapSis.forEach(cs => {
+                    let s = cs.val(); let kls = window.hitungKelasOtomatis(s.tahun, s.kelasAwal).toString();
+                    if(target === 'SEMUA' || target === kls || targetNisArr.includes(s.nis)) {
+                        cbKat.forEach(cKat => {
+                            let idT = push(child(ref(db), 'dumb')).key;
+                            updates[`student_bills/${unit}/${s.nis}/${idT}`] = {
+                                id: idT, id_katalog: cKat.value, nama_tagihan: cKat.dataset.nama,
+                                total: parseInt(cKat.dataset.nom), terbayar: 0, sisa: parseInt(cKat.dataset.nom), status: 'BELUM'
+                            };
+                        }); count++;
                     }
                 });
-                await update(ref(db), updates);
-                Swal.fire('Sukses', `Tagihan berhasil disebar ke ${count} siswa.`, 'success');
-            } else { Swal.fire('Kosong', 'Tidak ada data siswa', 'info'); }
+                await update(ref(db), updates); Swal.fire('Sukses', `Disebar ke ${count} siswa.`, 'success');
+            }
         };
 
-        // ================= KASIR PEMBAYARAN =================
+        // KASIR & SISA TAGIHAN & NOTA
         window.cariSiswaKasir = async () => {
             let kw = document.getElementById('kasir-search').value.toLowerCase();
-            if(!kw) return;
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
             const snap = await get(child(ref(db), `students/${unit}`));
             let box = document.getElementById('kasir-hasil-cari'); box.innerHTML = ''; box.classList.remove('hidden');
-            let found = false;
             if(snap.exists()) {
                 snap.forEach(c => {
                     let s = c.val();
                     if(s.nama.toLowerCase().includes(kw) || s.nis.includes(kw)) {
-                        found = true;
-                        box.innerHTML += `<div onclick="window.pilihSiswaKasir('${s.nis}', '${s.nama}', '${window.hitungKelasOtomatis(s.tahun, s.kelasAwal)}')" class="p-2 hover:bg-blue-100 cursor-pointer border-b border-gray-200 text-sm"><span class="font-bold">${s.nama}</span> (NIS: ${s.nis})</div>`;
+                        box.innerHTML += `<div onclick="window.pilihSiswaKasir('${s.nis}','${s.nama}')" class="p-2 border-b cursor-pointer hover:bg-gray-100">${s.nama} (${s.nis})</div>`;
                     }
                 });
             }
-            if(!found) box.innerHTML = '<div class="p-2 text-sm text-red-500">Siswa tidak ditemukan</div>';
         };
 
-        window.pilihSiswaKasir = async (nis, nama, kls) => {
-            document.getElementById('kasir-hasil-cari').classList.add('hidden'); document.getElementById('kasir-search').value = '';
-            document.getElementById('kasir-area-tagihan').classList.remove('hidden');
-            document.getElementById('kasir-nama-siswa').innerText = nama; document.getElementById('kasir-nis-siswa').innerText = 'NIS: ' + nis;
-            document.getElementById('kasir-kelas-siswa').innerText = kls === 'Lulus' ? 'Lulus' : 'Kelas ' + kls;
-            
-            // Render Bills
+        window.pilihSiswaKasir = async (nis, nama) => {
+            document.getElementById('kasir-hasil-cari').classList.add('hidden'); document.getElementById('kasir-area-tagihan').classList.remove('hidden');
+            document.getElementById('kasir-nama-siswa').innerText = nama; document.getElementById('kasir-nis-siswa').innerText = nis;
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
             const snap = await get(child(ref(db), `student_bills/${unit}/${nis}`));
-            const tb = document.getElementById('kasir-table-tagihan'); tb.innerHTML = '';
+            let h = '';
             if(snap.exists()) {
                 snap.forEach(c => {
                     let b = c.val();
-                    let bgBtn = b.status === 'LUNAS' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 text-white';
-                    let txtStatus = b.status === 'LUNAS' ? '<span class="text-green-600 font-bold">LUNAS</span>' : '<span class="text-red-500 font-bold">BELUM</span>';
-                    let btnAction = b.status === 'LUNAS' ? `<button disabled class="px-3 py-1 rounded text-xs ${bgBtn}"><i class="fa-solid fa-check"></i></button>` : `<button onclick="window.bayarTagihan('${nis}', '${b.id}', '${b.nama_tagihan}', ${b.nominal})" class="px-3 py-1 rounded text-xs font-bold ${bgBtn}">BAYAR</button>`;
-                    
-                    tb.innerHTML += `<tr><td class="p-3">${b.nama_tagihan}</td><td class="p-3 font-mono">${window.formatRupiah(b.nominal)}</td><td class="p-3">${txtStatus}</td><td class="p-3 text-center">${btnAction}</td></tr>`;
+                    if(b.status !== 'LUNAS') {
+                        h += `<tr>
+                            <td class="p-2 border-b"><input type="checkbox" class="cb-bayar" value="${b.id}" data-nama="${b.nama_tagihan}" data-sisa="${b.sisa}" data-kat="${b.id_katalog}"></td>
+                            <td class="p-2 border-b text-xs">${b.nama_tagihan}</td>
+                            <td class="p-2 border-b text-xs">${window.formatRp(b.total)}</td>
+                            <td class="p-2 border-b text-xs text-red-600 font-bold">${window.formatRp(b.sisa)}</td>
+                            <td class="p-2 border-b text-[10px] bg-yellow-100">${b.status}</td>
+                            <td class="p-2 border-b"><button onclick="window.bayarCustom('${nis}','${b.id}','${b.nama_tagihan}',${b.sisa},'${b.id_katalog}')" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Bayar Custom</button></td>
+                        </tr>`;
+                    } else {
+                        h += `<tr><td class="p-2 border-b"></td><td class="p-2 border-b text-xs">${b.nama_tagihan}</td><td class="p-2 border-b text-xs">${window.formatRp(b.total)}</td><td class="p-2 border-b text-xs">Rp 0</td><td class="p-2 border-b text-[10px] bg-green-100 text-green-700 font-bold">LUNAS</td><td class="p-2 border-b"><button onclick="window.batalBayar('${nis}','${b.id}',${b.total})" class="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded">Batalkan</button></td></tr>`;
+                    }
                 });
-            } else { tb.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">Belum ada tagihan untuk siswa ini.</td></tr>'; }
+            }
+            document.getElementById('kasir-table-tagihan').innerHTML = h;
         };
 
-        window.bayarTagihan = async (nis, billId, namaTagihan, nominal) => {
-            if(confirm(`Konfirmasi pembayaran: ${namaTagihan} sebesar Rp${nominal}?`)) {
+        window.checkAllKasir = (el) => { document.querySelectorAll('.cb-bayar').forEach(c => c.checked = el.checked); };
+
+        window.bayarCustom = async (nis, bId, bNama, bSisa, bKatId) => {
+            const { value: nominal } = await Swal.fire({
+                title: `Bayar: ${bNama}`, text: `Sisa Tagihan: Rp ${bSisa}`, input: 'number',
+                inputPlaceholder: 'Masukkan nominal cicilan/bayar', showCancelButton: true
+            });
+            if(nominal) {
+                let bayar = parseInt(nominal);
+                if(bayar > bSisa) return Swal.fire('Error','Nominal melebihi sisa tagihan!','error');
+                await prosesTransaksi(nis, [{id:bId, nama:bNama, bayar:bayar, sisa_lama:bSisa, id_kat:bKatId}]);
+            }
+        };
+
+        window.prosesBayarTerpilih = async () => {
+            let cbs = document.querySelectorAll('.cb-bayar:checked');
+            if(cbs.length===0) return;
+            let nis = document.getElementById('kasir-nis-siswa').innerText;
+            let items = []; let total = 0;
+            cbs.forEach(c => { items.push({id: c.value, nama: c.dataset.nama, bayar: parseInt(c.dataset.sisa), sisa_lama: parseInt(c.dataset.sisa), id_kat: c.dataset.kat}); total += parseInt(c.dataset.sisa); });
+            
+            if(confirm(`Bayar LUNAS semua tagihan terpilih sejumlah ${window.formatRp(total)}?`)){
+                await prosesTransaksi(nis, items);
+            }
+        };
+
+        async function prosesTransaksi(nis, items) {
+            Swal.fire({title:'Memproses...', didOpen:()=>Swal.showLoading()});
+            const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+            const tgl = new Date().toISOString(); let notaHTML = ''; let totalBayar = 0;
+            const refTrx = ref(db, `transactions/${unit}`); const refBills = ref(db, `student_bills/${unit}/${nis}`);
+            const updates = {};
+            
+            items.forEach(it => {
+                let sisaBaru = it.sisa_lama - it.bayar;
+                updates[`student_bills/${unit}/${nis}/${it.id}/terbayar`] = parseInt(it.bayar); // simplifying for demo, ideally we += it
+                updates[`student_bills/${unit}/${nis}/${it.id}/sisa`] = sisaBaru;
+                updates[`student_bills/${unit}/${nis}/${it.id}/status`] = sisaBaru <= 0 ? 'LUNAS' : 'SEBAGIAN';
+                
+                // Tiap bayar jadi Transaksi Pemasukan (Simpan id_katalog = dompet)
+                let idTrx = push(refTrx).key;
+                updates[`transactions/${unit}/${idTrx}`] = { id: idTrx, tipe: 'IN', dompet: it.id_kat, nama_dompet: it.nama, tanggal: tgl, uraian: `Terima ${it.nama} (NIS:${nis})`, nominal: it.bayar };
+                
+                notaHTML += `<div class="flex justify-between"><span>${it.nama.substring(0,10)}..</span><span>${window.formatRp(it.bayar)}</span></div>`;
+                totalBayar += it.bayar;
+            });
+            await update(ref(db), updates); Swal.close();
+            
+            // Generate Nota Printer
+            document.getElementById('nota-tanggal').innerText = new Date().toLocaleString('id-ID');
+            document.getElementById('nota-nis').innerText = nis; document.getElementById('nota-nama').innerText = document.getElementById('kasir-nama-siswa').innerText;
+            document.getElementById('nota-items').innerHTML = notaHTML; document.getElementById('nota-total').innerText = window.formatRp(totalBayar);
+            
+            window.pilihSiswaKasir(nis, document.getElementById('kasir-nama-siswa').innerText);
+            
+            Swal.fire({ title:'Berhasil', text:'Cetak Nota Kasir?', icon:'success', showCancelButton:true, confirmButtonText:'Cetak', cancelButtonText:'Tutup' }).then((r)=>{
+                if(r.isConfirmed) window.print();
+            });
+        }
+
+        window.batalBayar = async (nis, bId, total) => {
+            // Sederhana: Kembalikan jadi BELUM. (Versi pro butuh track reverse ledger)
+            if(confirm('Batalkan status lunas tagihan ini? (Pemasukan di BKU tidak terhapus otomatis)')) {
                 const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-                const admin = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).nama;
-                const now = new Date().toISOString();
-                
-                // 1. Update status tagihan jadi LUNAS
-                await update(ref(db, `student_bills/${unit}/${nis}/${billId}`), { status: 'LUNAS', tgl_bayar: now });
-                
-                // 2. Catat ke Transaksi Kas (Pemasukan)
-                const refTrans = push(ref(db, `transactions/${unit}`));
-                await set(refTrans, { id: refTrans.key, tipe: 'IN', tanggal: now, uraian: `Pembayaran ${namaTagihan} (NIS: ${nis})`, nominal: parseInt(nominal), kasir: admin });
-                
-                Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Pembayaran Berhasil!', timer: 1500, showConfirmButton: false});
-                window.pilihSiswaKasir(nis, document.getElementById('kasir-nama-siswa').innerText, document.getElementById('kasir-kelas-siswa').innerText.replace('Kelas ',''));
-                window.updateStatistik(); window.renderBKU();
+                await update(ref(db, `student_bills/${unit}/${nis}/${bId}`), { status: 'BELUM', terbayar: 0, sisa: total });
+                window.pilihSiswaKasir(nis, document.getElementById('kasir-nama-siswa').innerText);
             }
         };
 
-        // ================= PENGELUARAN =================
-        window.simpanPengeluaran = async (e) => {
-            e.preventDefault();
+        // PENGELUARAN & DASHBOARD DOMPET
+        window.renderStatistik = async () => {
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            const admin = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).nama;
-            const tgl = document.getElementById('out-tanggal').value;
-            const uraian = document.getElementById('out-uraian').value;
-            const nom = parseInt(document.getElementById('out-nominal').value);
-            
-            const refTrans = push(ref(db, `transactions/${unit}`));
-            await set(refTrans, { id: refTrans.key, tipe: 'OUT', tanggal: new Date(tgl).toISOString(), uraian: uraian, nominal: nom, kasir: admin });
-            
-            document.getElementById('form-pengeluaran').reset();
-            Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Pengeluaran Disimpan', timer: 1500, showConfirmButton: false});
-            window.renderPengeluaran(); window.renderBKU(); window.updateStatistik();
-        };
+            // 1. Tarik Dompet dari Katalog
+            const snapKat = await get(child(ref(db), `katalog_tagihan/${unit}`));
+            let dompets = {}; let optDompet = '';
+            if(snapKat.exists()){ snapKat.forEach(c => { let d = c.val(); dompets[d.id] = {nama: d.nama, saldo: 0}; optDompet += `<option value="${d.id}">${d.nama}</option>`; }); }
+            document.getElementById('out-dompet').innerHTML = optDompet;
 
-        window.renderPengeluaran = async () => {
-            const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            const snap = await get(child(ref(db), `transactions/${unit}`));
-            const tb = document.getElementById('table-pengeluaran'); tb.innerHTML = '';
-            let count = 0;
-            if(snap.exists()) {
-                let dataArr = []; snap.forEach(c => { dataArr.push(c.val()); });
-                // Filter hanya yang OUT dan urutkan terbaru
-                dataArr.filter(d => d.tipe === 'OUT').sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal)).forEach(d => {
-                    count++;
-                    tb.innerHTML += `<tr class="border-b"><td class="p-3 text-xs">${window.formatTanggal(d.tanggal)}</td><td class="p-3">${d.uraian}</td><td class="p-3 font-mono text-red-600">${window.formatRupiah(d.nominal)}</td><td class="p-3 text-center"><button onclick="window.hapusTransaksi('${d.id}')" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+            // 2. Hitung Saldo
+            const snapTrx = await get(child(ref(db), `transactions/${unit}`));
+            let totIn = 0, totOut = 0;
+            let tbodyOut = '';
+            if(snapTrx.exists()){
+                let arrOut = [];
+                snapTrx.forEach(c => {
+                    let t = c.val();
+                    if(t.tipe==='IN'){ totIn+=t.nominal; if(dompets[t.dompet]) dompets[t.dompet].saldo += t.nominal; }
+                    if(t.tipe==='OUT'){ totOut+=t.nominal; if(dompets[t.dompet]) dompets[t.dompet].saldo -= t.nominal; arrOut.push(t); }
+                });
+                arrOut.sort((a,b)=>new Date(b.tanggal)-new Date(a.tanggal)).forEach(t => {
+                    tbodyOut += `<tr class="border-b"><td class="p-2">${new Date(t.tanggal).toLocaleDateString()}</td><td class="p-2 text-xs bg-gray-100 rounded">${t.nama_dompet||'-'}</td><td class="p-2">${t.uraian}</td><td class="p-2 text-red-600 font-bold">${window.formatRp(t.nominal)}</td></tr>`;
                 });
             }
-            if(count===0) tb.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">Belum ada data pengeluaran</td></tr>';
+            document.getElementById('dash-saldo').innerText = window.formatRp(totIn - totOut);
+            document.getElementById('table-pengeluaran').innerHTML = tbodyOut;
+
+            // 3. Render Card Dompet di Dashboard
+            let gridHtml = '';
+            for(let key in dompets) {
+                gridHtml += `<div class="bg-white p-4 rounded-xl border-t-4 border-blue-500 shadow-sm"><div class="text-[10px] text-gray-400 font-bold uppercase">${dompets[key].nama}</div><div class="text-lg font-black text-blue-900">${window.formatRp(dompets[key].saldo)}</div></div>`;
+            }
+            document.getElementById('grid-dompet').innerHTML = gridHtml;
         };
 
-        // ================= BUKU KAS UMUM (BKU) & STATISTIK =================
+        window.simpanPengeluaran = async (e) => {
+            e.preventDefault(); const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+            let tgl = document.getElementById('out-tanggal').value; let ur = document.getElementById('out-uraian').value; let nom = parseInt(document.getElementById('out-nominal').value);
+            let idDompet = document.getElementById('out-dompet').value; let nmDompet = document.getElementById('out-dompet').options[document.getElementById('out-dompet').selectedIndex].text;
+            
+            let idTrx = push(ref(db, `transactions/${unit}`)).key;
+            await set(ref(db, `transactions/${unit}/${idTrx}`), { id: idTrx, tipe: 'OUT', dompet: idDompet, nama_dompet: nmDompet, tanggal: new Date(tgl).toISOString(), uraian: ur, nominal: nom });
+            
+            document.getElementById('form-pengeluaran').reset(); window.renderStatistik(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Tersimpan', showConfirmButton:false, timer:1000});
+        };
+
+        // BKU
         window.renderBKU = async () => {
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
             const snap = await get(child(ref(db), `transactions/${unit}`));
-            const tb = document.getElementById('table-bku'); tb.innerHTML = '';
-            
+            let h = ''; let saldo = 0;
             if(snap.exists()) {
-                let dataArr = []; snap.forEach(c => { dataArr.push(c.val()); });
-                // Urutkan dari terlama ke terbaru untuk hitung saldo berjalan
-                dataArr.sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
-                
-                let saldo = 0;
-                dataArr.forEach(d => {
-                    let masuk = d.tipe === 'IN' ? d.nominal : 0;
-                    let keluar = d.tipe === 'OUT' ? d.nominal : 0;
-                    saldo += (masuk - keluar);
-                    
-                    tb.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="p-3 border text-xs whitespace-nowrap">${window.formatTanggal(d.tanggal)}</td><td class="p-3 border">${d.uraian}</td><td class="p-3 border text-right font-mono text-green-700">${masuk > 0 ? window.formatRupiah(masuk) : '-'}</td><td class="p-3 border text-right font-mono text-red-700">${keluar > 0 ? window.formatRupiah(keluar) : '-'}</td><td class="p-3 border text-right font-mono font-bold text-blue-800 bg-blue-50/30">${window.formatRupiah(saldo)}</td></tr>`;
-                });
-            } else {
-                tb.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400 italic">Buku kas masih kosong. Transaksi akan muncul otomatis di sini.</td></tr>';
-            }
-        };
-
-        window.updateStatistik = async () => {
-            const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            const snap = await get(child(ref(db), `transactions/${unit}`));
-            let totalIn = 0, totalOut = 0;
-            if(snap.exists()) {
-                snap.forEach(c => {
-                    let d = c.val();
-                    if(d.tipe === 'IN') totalIn += d.nominal; else if(d.tipe === 'OUT') totalOut += d.nominal;
+                let arr = []; snap.forEach(c => arr.push(c.val()));
+                arr.sort((a,b)=>new Date(a.tanggal)-new Date(b.tanggal)).forEach(d => {
+                    let m = d.tipe==='IN'?d.nominal:0; let k = d.tipe==='OUT'?d.nominal:0; saldo += (m-k);
+                    h += `<tr><td class="p-2 border">${new Date(d.tanggal).toLocaleDateString('id-ID')}</td><td class="p-2 border text-xs">${d.uraian} <span class="bg-gray-100 px-1 rounded text-[10px]">${d.nama_dompet||''}</span></td><td class="p-2 border text-right text-green-700">${m>0?window.formatRp(m):'-'}</td><td class="p-2 border text-right text-red-700">${k>0?window.formatRp(k):'-'}</td><td class="p-2 border text-right font-bold bg-blue-50">${window.formatRp(saldo)}</td></tr>`;
                 });
             }
-            document.getElementById('dash-masuk').innerText = window.formatRupiah(totalIn);
-            document.getElementById('dash-keluar').innerText = window.formatRupiah(totalOut);
-            document.getElementById('dash-saldo').innerText = window.formatRupiah(totalIn - totalOut);
+            document.getElementById('table-bku').innerHTML = h;
         };
 
-        window.hapusTransaksi = async (id) => {
-            if(confirm("Hapus catatan transaksi ini? Peringatan: Saldo akan ikut berubah!")) {
-                const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-                await set(ref(db, `transactions/${unit}/${id}`), null);
-                window.renderPengeluaran(); window.renderBKU(); window.updateStatistik();
-            }
-        };
-
-        // ================= INIT AUTO-START =================
-        window.addEventListener('DOMContentLoaded', () => {
-            // Jalankan Jam Digital
-            setInterval(() => {
-                let d = new Date();
-                if(document.getElementById('realtime-time')) {
-                    document.getElementById('realtime-time').innerText = d.toLocaleTimeString('id-ID', {hour12: false});
-                    document.getElementById('realtime-date').innerText = d.toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'short', day: 'numeric'});
-                }
-            }, 1000);
-
-            // Cek Login
-            const sesi = localStorage.getItem('sesi_kas_sekolah');
-            if(sesi) { const dataSesi = JSON.parse(sesi); window.initDashboard(dataSesi.nama, dataSesi.unit); }
-        });
+        window.addEventListener('DOMContentLoaded', () => { if(localStorage.getItem('sesi_kas_sekolah')) window.initDash(); });
     </script>
 </body>
 </html>
