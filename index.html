@@ -464,6 +464,7 @@
                         h += `<tr class="bg-slate-50"><td class="p-3"></td><td class="p-3 text-gray-500">${b.nama_tagihan}</td><td class="p-3 text-gray-400">${window.formatRp(b.total)}</td><td class="p-3 text-gray-400">Rp 0</td><td class="p-3"><span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded font-bold">LUNAS</span></td><td class="p-3 text-center"><button onclick="window.batalBayar('${nis}','${b.id}',${b.total})" class="text-[10px] text-red-400 hover:text-red-600 font-bold underline">Batalkan</button></td></tr>`;
                     }
 
+                    // A5 CETAK DENGAN TANGGAL
                     let cetakWarna = b.status === 'LUNAS' ? 'text-green-700' : (b.status === 'BELUM' ? 'text-red-600' : 'text-yellow-600');
                     hCetak += `<tr><td class="p-1.5 border border-black text-center">${tglText}</td><td class="p-1.5 border border-black truncate max-w-[120px]">${b.nama_tagihan}</td><td class="p-1.5 border border-black text-right">${window.formatRp(b.total)}</td><td class="p-1.5 border border-black text-right">${window.formatRp(trb)}</td><td class="p-1.5 border border-black text-right font-bold">${window.formatRp(b.sisa)}</td><td class="p-1.5 border border-black text-center font-bold ${cetakWarna}">${b.status}</td></tr>`;
                 });
@@ -485,7 +486,6 @@
         window.bayarCustom = async (nis, bId, bNama, bSisa, bKatId, bTerbayar) => { const { value: nominal } = await Swal.fire({ title: `Bayar Sebagian`, text: `${bNama} (Sisa: Rp ${bSisa})`, input: 'number', inputPlaceholder: 'Ketik nominal uang...', showCancelButton: true, confirmButtonText: 'Proses' }); if(nominal) { let bayar = parseInt(nominal); if(bayar > bSisa) return Swal.fire('Error','Nominal melebihi sisa tagihan!','error'); if(bayar <= 0) return Swal.fire('Error','Nominal tidak valid','error'); await prosesTransaksi(nis, [{id:bId, nama:bNama, bayar:bayar, sisa_lama:parseInt(bSisa), id_kat:bKatId, terbayar_lama:parseInt(bTerbayar)}]); } };
         window.prosesBayarTerpilih = async () => { let cbs = document.querySelectorAll('.cb-bayar:checked'); if(cbs.length===0) return Swal.fire('Oops','Pilih dulu tagihan yang mau dibayar.','warning'); let nis = document.getElementById('kasir-nis-siswa').innerText; let items = []; let total = 0; let nms = []; cbs.forEach(c => { items.push({id: c.value, nama: c.dataset.nama, bayar: parseInt(c.dataset.sisa), sisa_lama: parseInt(c.dataset.sisa), id_kat: c.dataset.kat, terbayar_lama: parseInt(c.dataset.terbayar)}); total += parseInt(c.dataset.sisa); nms.push(c.dataset.nama); }); Swal.fire({ title: 'Konfirmasi Pembayaran', html: `Bayar LUNAS tagihan berikut:<br><b class="text-sm text-primary">${nms.join(', ')}</b><br><br>Total: <b class="text-xl text-green-600">${window.formatRp(total)}</b>`, icon: 'question', showCancelButton: true, confirmButtonColor: '#16a34a', confirmButtonText: 'Ya, Bayar Lunas!' }).then(async (r) => { if(r.isConfirmed) await prosesTransaksi(nis, items); }); };
 
-        // PERBAIKAN BKU: PEMASUKAN MULTIPEL & NAMA SISWA 100% MASUK
         async function prosesTransaksi(nis, items) {
             Swal.fire({title:'Memproses...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
@@ -502,7 +502,6 @@
                 updates[`student_bills/${unit}/${nis}/${it.id}/status`] = sisaBaru <= 0 ? 'LUNAS' : 'SEBAGIAN';
                 updates[`student_bills/${unit}/${nis}/${it.id}/tgl_bayar`] = dateStrNow;
                 
-                // MENCATAT PEMASUKAN KE DATABASE
                 let idTrx = push(ref(db, `transactions/${unit}`)).key; 
                 updates[`transactions/${unit}/${idTrx}`] = { 
                     id: idTrx, tipe: 'IN', dompet: it.id_kat, nama_dompet: it.nama, 
@@ -534,6 +533,7 @@
                 snapTrx.forEach(c => {
                     let t = c.val(); 
                     let tTgl = new Date(t.tanggal); if(isNaN(tTgl.getTime())) tTgl = new Date();
+                    
                     if(t.tipe==='IN'){ totIn+=t.nominal; if(tTgl.getMonth() === blnSkrg && tTgl.getFullYear() === thnSkrg) inBulan += t.nominal; if(dompets[t.dompet]) dompets[t.dompet].saldo += t.nominal; }
                     if(t.tipe==='OUT'){ totOut+=t.nominal; if(tTgl.getMonth() === blnSkrg && tTgl.getFullYear() === thnSkrg) outBulan += t.nominal; if(dompets[t.dompet]) dompets[t.dompet].saldo -= t.nominal; arrOut.push(t); }
                 });
@@ -546,22 +546,18 @@
             document.getElementById('out-dompet').innerHTML = optDompet; document.getElementById('grid-dompet').innerHTML = gridHtml;
         };
 
-        // PERBAIKAN: FORMAT TANGGAL PENGELUARAN 100% ANTI INVALID DATE
         window.simpanPengeluaran = async (e) => { 
             e.preventDefault(); 
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; 
             let elDompet = document.getElementById('out-dompet'); 
             if(!elDompet.value) return Swal.fire('Oops', 'Pilih dompet terlebih dahulu!', 'error');
-            
             let idDompet = elDompet.value; let optDipilih = elDompet.options[elDompet.selectedIndex]; let saldoTersedia = parseInt(optDipilih.dataset.saldo) || 0; let nmDompet = optDipilih.text.split(' (')[0]; 
             
             let tglInput = document.getElementById('out-tanggal').value; 
-            let dObj = tglInput ? new Date(tglInput) : new Date();
-            if(isNaN(dObj.getTime())) dObj = new Date();
+            let dObj = tglInput ? new Date(tglInput) : new Date(); if(isNaN(dObj.getTime())) dObj = new Date();
             let tglSimpan = dObj.toISOString(); 
             
-            let ur = document.getElementById('out-uraian').value; 
-            let nom = parseInt(document.getElementById('out-nominal').value); 
+            let ur = document.getElementById('out-uraian').value; let nom = parseInt(document.getElementById('out-nominal').value); 
             if(isNaN(nom) || nom <= 0) return Swal.fire('Error', 'Nominal tidak valid!', 'error');
             if(nom > saldoTersedia) { return Swal.fire({ title: 'Saldo Tidak Cukup!', text: `Gagal! Dompet ini hanya bersaldo Rp ${saldoTersedia.toLocaleString('id-ID')}.`, icon: 'error' }); } 
             
@@ -573,7 +569,7 @@
         };
         window.hapusTransaksi = (idTrx) => { Swal.fire({title: 'Hapus Transaksi?', text: 'Saldo akan disesuaikan.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'}).then(async (r) => { if(r.isConfirmed) { const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; await set(ref(db, `transactions/${unit}/${idTrx}`), null); window.renderStatistik(); window.renderBKU(); } }); };
 
-        // --- BUKU KAS UMUM (DIPERKUAT SYSTEM SORT & FILTER) ---
+        // --- BUKU KAS UMUM (PERFECT ANTI ERROR) ---
         window.renderBKU = async () => {
             try {
                 const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
@@ -590,10 +586,11 @@
                     let arr = []; 
                     snap.forEach(c => arr.push(c.val()));
                     
-                    // Sort super aman, no NaN allowed
+                    // Sort super aman, hindari undefined / NaN
                     arr.sort((a,b) => {
-                        let tA = new Date(a.tanggal).getTime(); let tB = new Date(b.tanggal).getTime();
-                        return (isNaN(tA) ? 0 : tA) - (isNaN(tB) ? 0 : tB);
+                        let tA = new Date(a.tanggal).getTime() || 0; 
+                        let tB = new Date(b.tanggal).getTime() || 0;
+                        return tA - tB;
                     });
                     
                     let filteredArr = [];
@@ -638,7 +635,7 @@
                 document.getElementById('table-bku').innerHTML = h;
             } catch (e) {
                 console.error("Error BKU:", e);
-                document.getElementById('table-bku').innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-500">Terjadi kesalahan pada sistem BKU.</td></tr>';
+                document.getElementById('table-bku').innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-500">Terjadi kesalahan. Coba hapus cache atau refresh halaman.</td></tr>';
             }
         };
 
