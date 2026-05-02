@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kas Sekolah Terpadu - vFinal</title>
+    <title>Sistem Kas Sekolah Terpadu - v5.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -17,9 +17,7 @@
         .hidden-section { display: none !important; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         
-        /* MANAJEMEN MODE PRINT (Nota Mini vs A5 vs BKU) */
         @media print {
-            /* Sembunyikan semua kecuali yang sedang di print */
             body.print-nota * { visibility: hidden; }
             body.print-nota #area-nota, body.print-nota #area-nota * { visibility: visible; }
             body.print-nota #area-nota { position: absolute; left: 0; top: 0; width: 58mm; padding: 5mm; font-family: monospace; font-size: 12px; color: black; background: white; }
@@ -30,7 +28,6 @@
 
             body.print-riwayat * { visibility: hidden; }
             body.print-riwayat #area-cetak-riwayat, body.print-riwayat #area-cetak-riwayat * { visibility: visible; }
-            /* Khusus A5 Setting */
             body.print-riwayat #area-cetak-riwayat { position: absolute; left: 0; top: 0; width: 148mm; min-height: 210mm; background: white; padding: 8mm; }
 
             .no-print { display: none !important; }
@@ -57,13 +54,8 @@
             <p class="text-[10px] font-bold uppercase mt-1">Sistem Kas Sekolah Terpadu</p>
         </div>
         <div class="flex justify-between items-end mb-4 font-bold text-[11px]">
-            <div>
-                <p>Nama Siswa : <span id="cetak-riwayat-nama" class="uppercase"></span></p>
-                <p>NIS / Induk: <span id="cetak-riwayat-nis"></span></p>
-            </div>
-            <div class="text-right">
-                <p>Tanggal Cetak: <span id="cetak-riwayat-tgl"></span></p>
-            </div>
+            <div><p>Nama Siswa : <span id="cetak-riwayat-nama" class="uppercase"></span></p><p>NIS / Induk: <span id="cetak-riwayat-nis"></span></p></div>
+            <div class="text-right"><p>Tanggal Cetak: <span id="cetak-riwayat-tgl"></span></p></div>
         </div>
         <table class="w-full text-left text-[10px] border-collapse border border-black">
             <thead>
@@ -78,11 +70,7 @@
             <tbody id="cetak-riwayat-body"></tbody>
         </table>
         <div class="mt-12 flex justify-end text-[10px]">
-            <div class="text-center w-32">
-                <p>Mengetahui,</p>
-                <p class="mb-16 font-bold mt-1">Kasir</p>
-                <p class="font-bold border-b border-black inline-block min-w-full leading-relaxed capitalize" id="cetak-riwayat-admin"></p>
-            </div>
+            <div class="text-center w-32"><p>Mengetahui,</p><p class="mb-16 font-bold mt-1">Kasir</p><p class="font-bold border-b border-black inline-block min-w-full leading-relaxed capitalize" id="cetak-riwayat-admin"></p></div>
         </div>
     </div>
 
@@ -106,6 +94,7 @@
                 <a href="#" id="nav-kasir" onclick="window.switchMenu('menu-kasir', 'Kasir Pembayaran')" class="nav-item hover:bg-blue-800 p-3 rounded-lg flex items-center gap-3 transition"><i class="fa-solid fa-cash-register w-5 text-center"></i> Kasir</a>
                 <a href="#" id="nav-pengeluaran" onclick="window.switchMenu('menu-pengeluaran', 'Pengeluaran Kas')" class="nav-item hover:bg-blue-800 p-3 rounded-lg flex items-center gap-3 transition"><i class="fa-solid fa-money-bill-transfer w-5 text-center"></i> Pengeluaran</a>
                 <a href="#" id="nav-bku" onclick="window.switchMenu('menu-bku', 'Buku Kas Umum')" class="nav-item hover:bg-blue-800 p-3 rounded-lg flex items-center gap-3 transition"><i class="fa-solid fa-book w-5 text-center"></i> BKU</a>
+                <a href="#" id="nav-setting" onclick="window.switchMenu('menu-setting', 'Pengaturan Sistem')" class="nav-item hover:bg-blue-800 p-3 rounded-lg flex items-center gap-3 transition"><i class="fa-solid fa-gear w-5 text-center"></i> Pengaturan</a>
             </nav>
             <div class="p-4 border-t border-blue-800 text-xs">Login: <span id="dash-user-name" class="font-bold">Admin</span> (<span id="dash-unit" class="uppercase">Unit</span>)</div>
         </aside>
@@ -198,15 +187,11 @@
 
                         <div class="md:col-span-2">
                             <div id="kasir-area-placeholder" class="bg-white p-10 rounded-xl shadow-sm border text-center text-gray-400 h-full flex flex-col items-center justify-center">
-                                <i class="fa-solid fa-cash-register text-5xl mb-3 text-gray-200"></i><p>Pilih siswa dari daftar di samping untuk melihat dan membayar tagihan.</p>
+                                <i class="fa-solid fa-cash-register text-5xl mb-3 text-gray-200"></i><p>Pilih siswa dari daftar di samping untuk melihat tagihan.</p>
                             </div>
-
                             <div id="kasir-area-tagihan" class="hidden bg-white rounded-xl shadow-sm border flex flex-col h-[calc(100vh-140px)]">
                                 <div class="p-4 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
-                                    <div>
-                                        <h3 id="kasir-nama-siswa" class="font-bold text-lg text-primary">Nama Siswa</h3>
-                                        <p id="kasir-nis-siswa" class="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-0.5 rounded inline-block mt-1">NIS</p>
-                                    </div>
+                                    <div><h3 id="kasir-nama-siswa" class="font-bold text-lg text-primary">Nama Siswa</h3><p id="kasir-nis-siswa" class="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-0.5 rounded inline-block mt-1">NIS</p></div>
                                     <div class="flex gap-2">
                                         <button onclick="window.cetakRiwayatPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-md transition"><i class="fa-solid fa-file-pdf mr-1"></i> Cetak Kartu A5</button>
                                         <button onclick="window.prosesBayarTerpilih()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-bold text-sm shadow-md transition"><i class="fa-solid fa-check-double mr-1"></i> Bayar Terpilih</button>
@@ -258,16 +243,15 @@
                             <label class="text-xs font-bold text-gray-500 block mb-1">Filter Bulan:</label>
                             <select id="bku-bulan" onchange="window.renderBKU()" class="border p-2 rounded-lg text-sm outline-none">
                                 <option value="all">Semua Bulan (Tahun Ini)</option>
-                                <option value="01">Januari</option><option value="02">Februari</option><option value="03">Maret</option>
-                                <option value="04">April</option><option value="05">Mei</option><option value="06">Juni</option>
-                                <option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option>
+                                <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+                                <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+                                <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
                                 <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
                             </select>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 block mb-1">Filter Tahun:</label>
-                            <select id="bku-tahun" onchange="window.renderBKU()" class="border p-2 rounded-lg text-sm outline-none">
-                                </select>
+                            <select id="bku-tahun" onchange="window.renderBKU()" class="border p-2 rounded-lg text-sm outline-none"></select>
                         </div>
                     </div>
                     
@@ -287,6 +271,44 @@
                             <p class="mb-20 font-bold">Admin / Kasir</p>
                             <p class="font-bold border-b border-black inline-block min-w-full leading-relaxed capitalize" id="bku-nama-admin"></p>
                         </div>
+                    </div>
+                </div>
+
+                <div id="menu-setting" class="view-section hidden-section">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2"><i class="fa-solid fa-gear text-primary mr-2"></i> Pengaturan Sistem</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        
+                        <div class="bg-white p-5 rounded-xl shadow-sm border">
+                            <h3 class="font-bold mb-4 border-b pb-2 text-slate-700"><i class="fa-solid fa-user-shield text-blue-500 mr-2"></i> Ubah Profil & Password</h3>
+                            <form id="form-setting-profil" onsubmit="window.simpanProfil(event)" class="space-y-4">
+                                <div><label class="text-xs font-bold text-gray-500">Nama Admin / Kasir</label><input type="text" id="set-nama" required class="w-full border p-2.5 rounded-lg text-sm bg-slate-50"></div>
+                                <div><label class="text-xs font-bold text-gray-500">Username Login Baru</label><input type="text" id="set-username" required class="w-full border p-2.5 rounded-lg text-sm bg-slate-50"></div>
+                                <div><label class="text-xs font-bold text-gray-500">Password Baru</label><input type="password" id="set-password" required class="w-full border p-2.5 rounded-lg text-sm bg-slate-50"></div>
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold text-sm transition">Simpan Profil</button>
+                            </form>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl shadow-sm border">
+                            <h3 class="font-bold mb-4 border-b pb-2 text-slate-700"><i class="fa-solid fa-database text-green-500 mr-2"></i> Backup & Restore Data</h3>
+                            <p class="text-xs text-gray-500 mb-4">Simpan cadangan data Anda secara rutin, atau kembalikan data dari file cadangan (.json).</p>
+                            <div class="space-y-3">
+                                <button onclick="window.backupData()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg font-bold text-sm transition flex justify-center items-center gap-2"><i class="fa-solid fa-download"></i> Download Backup Data</button>
+                                
+                                <input type="file" id="file-restore" class="hidden" accept=".json" onchange="window.prosesRestore(this)">
+                                <button onclick="document.getElementById('file-restore').click()" class="w-full border-2 border-slate-300 text-slate-600 hover:bg-slate-100 py-2.5 rounded-lg font-bold text-sm transition flex justify-center items-center gap-2"><i class="fa-solid fa-upload"></i> Restore Data dari File</button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-red-200">
+                            <h3 class="font-bold mb-4 border-b border-red-200 pb-2 text-red-600"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Zona Bahaya (Reset)</h3>
+                            <p class="text-xs text-gray-500 mb-4">Aksi ini tidak dapat dibatalkan. Pastikan Anda sudah mem-backup data terlebih dahulu.</p>
+                            <div class="space-y-3 mt-auto">
+                                <button onclick="window.resetKeuangan()" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-bold text-sm transition shadow-sm"><i class="fa-solid fa-money-bill-wave mr-1"></i> Reset Data Keuangan</button>
+                                <button onclick="window.resetSiswa()" class="w-full bg-red-700 hover:bg-red-800 text-white py-2 rounded-lg font-bold text-sm transition shadow-sm"><i class="fa-solid fa-users-slash mr-1"></i> Reset Semua Data Siswa</button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -355,11 +377,15 @@
             document.getElementById('dash-user-name').innerText = s.nama; document.getElementById('dash-unit').innerText = s.unit;
             document.getElementById('bku-nama-admin').innerText = s.nama; document.getElementById('cetak-riwayat-admin').innerText = s.nama;
             
+            // Isi form Profil
+            document.getElementById('set-nama').value = s.nama;
+            document.getElementById('set-username').value = s.uid;
+
             let currentYear = new Date().getFullYear();
             let yearOptions = '';
             for(let i = 2023; i <= currentYear + 2; i++) { yearOptions += `<option value="${i}">${i}</option>`; }
             document.getElementById('bku-tahun').innerHTML = yearOptions;
-            document.getElementById('bku-bulan').value = String(new Date().getMonth() + 1).padStart(2, '0');
+            document.getElementById('bku-bulan').value = String(new Date().getMonth() + 1);
             document.getElementById('bku-tahun').value = String(currentYear);
 
             window.switchMenu('menu-dashboard', 'Dashboard');
@@ -390,7 +416,7 @@
         window.openModalSiswa = (mode, nis='', nama='', thn='', kls='7') => { document.getElementById('s-mode').value = mode; document.getElementById('s-old-nis').value = nis; document.getElementById('s-nis').value = nis; document.getElementById('s-nama').value = nama; document.getElementById('s-tahun').value = thn || new Date().getFullYear(); document.getElementById('s-kelas').value = kls; document.getElementById('modal-siswa-title').innerText = mode === 'tambah' ? 'Tambah Data Siswa' : 'Edit Data Siswa'; document.getElementById('modal-siswa').classList.remove('hidden'); };
         window.submitSiswa = async (e) => { e.preventDefault(); const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; const mode = document.getElementById('s-mode').value, oldNis = document.getElementById('s-old-nis').value; const data = { nis: document.getElementById('s-nis').value, nama: document.getElementById('s-nama').value, tahun: document.getElementById('s-tahun').value, kelasAwal: document.getElementById('s-kelas').value }; if(mode==='edit' && oldNis !== data.nis) await set(ref(db, `students/${unit}/${oldNis}`), null); await set(ref(db, `students/${unit}/${data.nis}`), data); document.getElementById('modal-siswa').classList.add('hidden'); window.renderSiswa(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Tersimpan', showConfirmButton:false, timer:1500}); };
         window.renderSiswa = async () => { const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; const kw = document.getElementById('search-siswa-master').value.toLowerCase(); const filterKls = document.getElementById('filter-kelas-master').value; const snap = await get(child(ref(db), `students/${unit}`)); let h = '', cM = ''; if(snap.exists()){ snap.forEach(c => { let s = c.val(); let kls = window.hitungKelasOtomatis(s.tahun, s.kelasAwal).toString(); if((filterKls === '' || filterKls === kls) && (s.nama.toLowerCase().includes(kw) || s.nis.includes(kw))){ let badge = kls === 'Lulus' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'; h += `<tr class="hover:bg-slate-50 transition"><td class="p-3">${s.nis}</td><td class="p-3 font-bold text-slate-700">${s.nama}</td><td class="p-3"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${kls==='Lulus'?'Lulus':'Kelas '+kls}</span></td><td class="p-3 text-center"><button onclick="window.openModalSiswa('edit','${s.nis}','${s.nama}','${s.tahun}','${s.kelasAwal}')" class="text-blue-500 hover:text-blue-700 p-2"><i class="fa-solid fa-edit"></i></button> <button onclick="window.hapusSiswa('${s.nis}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button></td></tr>`; cM += `<label class="flex items-center gap-2 p-2 border rounded hover:bg-slate-50"><input type="checkbox" class="cb-siswa-manual accent-primary" value="${s.nis}"> <div class="truncate w-full">${s.nama} <span class="text-[10px] text-gray-400">(${kls})</span></div></label>`; } }); } document.getElementById('table-siswa-body').innerHTML = h || '<tr><td colspan="4" class="p-4 text-center text-gray-400">Tidak ada data siswa.</td></tr>'; document.getElementById('checkbox-siswa-manual').innerHTML = cM; };
-        window.hapusSiswa = (nis) => { Swal.fire({title: 'Hapus Siswa?', text: 'Data tidak bisa dikembalikan', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'}).then(async (r) => { if(r.isConfirmed) { await set(ref(db, `students/${JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit}/${nis}`), null); window.renderSiswa(); } }); };
+        window.hapusSiswa = (nis) => { Swal.fire({title: 'Hapus Siswa?', text: 'Data tidak bisa dikembalikan', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'}).then(async (r) => { if(r.isConfirmed) { await set(ref(db, `students/${JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit}/${nis}`), null); await set(ref(db, `student_bills/${JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit}/${nis}`), null); window.renderSiswa(); } }); };
 
         window.simpanKatalog = async (e) => { e.preventDefault(); const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; let id = document.getElementById('kat-id').value; if(!id) id = push(ref(db, `katalog_tagihan/${unit}`)).key; await set(ref(db, `katalog_tagihan/${unit}/${id}`), { id: id, nama: document.getElementById('kat-nama').value, kategori: document.getElementById('kat-kategori').value, nominal: parseInt(document.getElementById('kat-nominal').value) }); document.getElementById('form-buat-tagihan').reset(); document.getElementById('kat-id').value = ''; window.renderKatalog(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Katalog Tersimpan', showConfirmButton:false, timer:1500}); };
         window.editKatalog = (id, nm, kat, nom) => { document.getElementById('kat-id').value=id; document.getElementById('kat-nama').value=nm; document.getElementById('kat-kategori').value=kat; document.getElementById('kat-nominal').value=nom; };
@@ -398,7 +424,6 @@
         window.hapusKatalog = (id) => { Swal.fire({title: 'Hapus Katalog?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'}).then(async (r) => { if(r.isConfirmed) { await set(ref(db, `katalog_tagihan/${JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit}/${id}`), null); window.renderKatalog(); } }); };
         window.cekTargetKhusus = () => { document.getElementById('area-target-khusus').classList.toggle('hidden', document.getElementById('pilih-target').value !== 'KHUSUS'); };
 
-        // FIX 1: ANTI DUPLIKAT TAGIHAN SAAT DISEBAR
         window.terapkanTagihan = async () => { 
             const cbKat = document.querySelectorAll('.cb-kat:checked'); 
             if(cbKat.length === 0) return Swal.fire('Error','Pilih minimal 1 tagihan dari checkbox','warning'); 
@@ -412,47 +437,32 @@
             
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; 
             const snapSis = await get(child(ref(db), `students/${unit}`)); 
-            
-            // Ambil semua tagihan yang udah ada di database untuk mencegah duplikat
             const snapBills = await get(child(ref(db), `student_bills/${unit}`));
             const existingBills = snapBills.val() || {};
 
-            let countBerhasil = 0; 
-            let countDilewati = 0;
+            let countBerhasil = 0; let countDilewati = 0;
 
             if(snapSis.exists()) { 
                 const updates = {}; 
                 snapSis.forEach(cs => { 
                     let s = cs.val(); let kls = window.hitungKelasOtomatis(s.tahun, s.kelasAwal).toString(); 
                     if(target === 'SEMUA' || target === kls || targetNisArr.includes(s.nis)) { 
-                        
                         let studentBills = existingBills[s.nis] || {};
-
                         cbKat.forEach(cKat => { 
-                            // Cek apakah siswa ini sudah punya tagihan dengan ID Katalog tersebut
                             let sudahPunya = Object.values(studentBills).some(b => b.id_katalog === cKat.value);
-                            
                             if(!sudahPunya) {
                                 let idT = push(child(ref(db), 'dumb')).key; 
                                 updates[`student_bills/${unit}/${s.nis}/${idT}`] = { 
                                     id: idT, id_katalog: cKat.value, nama_tagihan: cKat.dataset.nama, 
                                     total: parseInt(cKat.dataset.nom), terbayar: 0, sisa: parseInt(cKat.dataset.nom), status: 'BELUM' 
-                                }; 
-                                countBerhasil++;
-                            } else {
-                                countDilewati++;
-                            }
+                                }; countBerhasil++;
+                            } else { countDilewati++; }
                         }); 
                     } 
                 }); 
-                
                 if(Object.keys(updates).length > 0) {
-                    await update(ref(db), updates); 
-                    Swal.fire('Sukses', `Menambah ${countBerhasil} tagihan baru. (${countDilewati} di-skip karena sudah punya)`, 'success'); 
-                } else {
-                    Swal.fire('Info', 'Semua siswa di target ini sudah memiliki tagihan tersebut.', 'info'); 
-                }
-                
+                    await update(ref(db), updates); Swal.fire('Sukses', `Menambah ${countBerhasil} tagihan baru. (${countDilewati} di-skip karena sudah punya)`, 'success'); 
+                } else { Swal.fire('Info', 'Semua siswa di target ini sudah memiliki tagihan tersebut.', 'info'); }
                 document.querySelectorAll('.cb-kat').forEach(c => c.checked = false); 
             } 
         };
@@ -478,9 +488,8 @@
                         h += `<tr class="bg-slate-50"><td class="p-3"></td><td class="p-3 text-gray-500">${b.nama_tagihan}</td><td class="p-3 text-gray-400">${window.formatRp(b.total)}</td><td class="p-3 text-gray-400">Rp 0</td><td class="p-3"><span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded font-bold">LUNAS</span></td><td class="p-3 text-center"><button onclick="window.batalBayar('${nis}','${b.id}',${b.total})" class="text-[10px] text-red-400 hover:text-red-600 font-bold underline">Batalkan</button></td></tr>`;
                     }
 
-                    // A5 PDF Template
                     let cetakWarna = b.status === 'LUNAS' ? 'text-green-700' : (b.status === 'BELUM' ? 'text-red-600' : 'text-yellow-600');
-                    hCetak += `<tr><td class="p-1.5 border border-black truncate max-w-[100px]">${b.nama_tagihan}</td><td class="p-1.5 border border-black text-right">${window.formatRp(b.total)}</td><td class="p-1.5 border border-black text-right">${window.formatRp(b.terbayar)}</td><td class="p-1.5 border border-black text-right font-bold">${window.formatRp(b.sisa)}</td><td class="p-1.5 border border-black text-center font-bold ${cetakWarna}">${b.status}</td></tr>`;
+                    hCetak += `<tr><td class="p-1.5 border border-black truncate max-w-[120px]">${b.nama_tagihan}</td><td class="p-1.5 border border-black text-right">${window.formatRp(b.total)}</td><td class="p-1.5 border border-black text-right">${window.formatRp(b.terbayar)}</td><td class="p-1.5 border border-black text-right font-bold">${window.formatRp(b.sisa)}</td><td class="p-1.5 border border-black text-center font-bold ${cetakWarna}">${b.status}</td></tr>`;
                 });
             } else { h = '<tr><td colspan="6" class="p-6 text-center text-gray-400">Tidak ada tagihan aktif untuk siswa ini.</td></tr>'; hCetak = '<tr><td colspan="5" class="p-4 text-center">Belum ada riwayat tagihan.</td></tr>'; }
             
@@ -489,20 +498,14 @@
             Swal.close();
         };
 
-        // FIX: TAMPILKAN PDF A5 (HILANGKAN HIDDEN TAILWIND SAAT PRINT)
         window.cetakRiwayatPDF = () => {
             document.getElementById('cetak-riwayat-nama').innerText = document.getElementById('kasir-nama-siswa').innerText;
             document.getElementById('cetak-riwayat-nis').innerText = document.getElementById('kasir-nis-siswa').innerText;
             document.getElementById('cetak-riwayat-tgl').innerText = new Date().toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
-            
             let areaCetak = document.getElementById('area-cetak-riwayat');
             areaCetak.classList.remove('hidden'); 
-            
-            document.body.className = 'print-riwayat bg-white';
-            window.print();
-            
-            document.body.className = 'bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col';
-            areaCetak.classList.add('hidden');
+            document.body.className = 'print-riwayat bg-white'; window.print();
+            document.body.className = 'bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col'; areaCetak.classList.add('hidden');
         };
 
         window.checkAllKasir = (el) => { document.querySelectorAll('.cb-bayar').forEach(c => c.checked = el.checked); };
@@ -512,59 +515,38 @@
         async function prosesTransaksi(nis, items) {
             Swal.fire({title:'Memproses...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            // Gunakan string YYYY-MM-DD local untuk menghindari geser zona waktu
             const dateStrNow = new Date().toISOString(); 
-            let notaHTML = ''; let totalBayar = 0;
-            const updates = {};
-            
+            let notaHTML = ''; let totalBayar = 0; const updates = {};
             const namaSiswa = document.getElementById('kasir-nama-siswa').innerText;
             
             items.forEach(it => {
                 let sisaBaru = it.sisa_lama - it.bayar;
-                let terbayarBaru = parseInt(it.bayar); // Asumsi sederhana bayar lunas dari sisa
+                let terbayarBaru = parseInt(it.bayar); 
                 
                 updates[`student_bills/${unit}/${nis}/${it.id}/terbayar`] = terbayarBaru; 
                 updates[`student_bills/${unit}/${nis}/${it.id}/sisa`] = sisaBaru;
                 updates[`student_bills/${unit}/${nis}/${it.id}/status`] = sisaBaru <= 0 ? 'LUNAS' : 'SEBAGIAN';
                 
-                // SIMPAN KE TRANSAKSI (UNTUK BKU)
                 let idTrx = push(ref(db, `transactions/${unit}`)).key; 
                 updates[`transactions/${unit}/${idTrx}`] = { 
                     id: idTrx, tipe: 'IN', dompet: it.id_kat, nama_dompet: it.nama, 
-                    tanggal: dateStrNow, 
-                    uraian: `Terima ${it.nama} - ${namaSiswa} (${nis})`, // Nama Siswa disertakan di BKU
-                    nominal: it.bayar 
+                    tanggal: dateStrNow, uraian: `Terima ${it.nama} - ${namaSiswa} (${nis})`, nominal: it.bayar 
                 };
                 
-                notaHTML += `<div class="flex justify-between"><span>${it.nama.substring(0,12)}..</span><span>${window.formatRp(it.bayar)}</span></div>`;
-                totalBayar += it.bayar;
+                notaHTML += `<div class="flex justify-between"><span>${it.nama.substring(0,12)}..</span><span>${window.formatRp(it.bayar)}</span></div>`; totalBayar += it.bayar;
             });
             
             await update(ref(db), updates); 
+            window.renderStatistik(); window.renderBKU(); Swal.close();
             
-            // FIX: Segarkan BKU & Statistik di Latar Belakang
-            window.renderStatistik();
-            window.renderBKU();
-
-            Swal.close();
-            
-            document.getElementById('nota-tanggal').innerText = new Date().toLocaleString('id-ID'); 
-            document.getElementById('nota-nis').innerText = nis; 
-            document.getElementById('nota-nama').innerText = namaSiswa; 
-            document.getElementById('nota-items').innerHTML = notaHTML; 
-            document.getElementById('nota-total').innerText = window.formatRp(totalBayar);
-            
+            document.getElementById('nota-tanggal').innerText = new Date().toLocaleString('id-ID'); document.getElementById('nota-nis').innerText = nis; document.getElementById('nota-nama').innerText = namaSiswa; document.getElementById('nota-items').innerHTML = notaHTML; document.getElementById('nota-total').innerText = window.formatRp(totalBayar);
             window.pilihSiswaKasir(nis, namaSiswa);
             
             Swal.fire({ title:'Pembayaran Sukses!', text:'Cetak Nota Kasir?', icon:'success', showCancelButton:true, confirmButtonText:'<i class="fa-solid fa-print"></i> Cetak Nota', cancelButtonText:'Tutup' }).then((r)=>{
-                if(r.isConfirmed) { 
-                    let areaNota = document.getElementById('area-nota'); areaNota.classList.remove('hidden');
-                    document.body.className = 'print-nota bg-white'; window.print(); 
-                    document.body.className = 'bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col'; areaNota.classList.add('hidden');
-                }
+                if(r.isConfirmed) { let areaNota = document.getElementById('area-nota'); areaNota.classList.remove('hidden'); document.body.className = 'print-nota bg-white'; window.print(); document.body.className = 'bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col'; areaNota.classList.add('hidden'); }
             });
         }
-        window.batalBayar = (nis, bId, total) => { Swal.fire({title: 'Batalkan Status Lunas?', text: 'Peringatan: Pemasukan di BKU tidak otomatis terhapus.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'}).then(async (r) => { if(r.isConfirmed) { const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; await update(ref(db, `student_bills/${unit}/${nis}/${bId}`), { status: 'BELUM', terbayar: 0, sisa: total }); window.pilihSiswaKasir(nis, document.getElementById('kasir-nama-siswa').innerText); } }); };
+        window.batalBayar = (nis, bId, total) => { Swal.fire({title: 'Batalkan Status Lunas?', text: 'Pemasukan di BKU harus dihapus secara manual di menu Pengeluaran jika diperlukan.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'}).then(async (r) => { if(r.isConfirmed) { const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; await update(ref(db, `student_bills/${unit}/${nis}/${bId}`), { status: 'BELUM', terbayar: 0, sisa: total }); window.pilihSiswaKasir(nis, document.getElementById('kasir-nama-siswa').innerText); } }); };
 
         // --- PENGELUARAN ---
         window.renderStatistik = async () => {
@@ -591,11 +573,7 @@
             e.preventDefault(); 
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; 
             let elDompet = document.getElementById('out-dompet'); let idDompet = elDompet.value; let optDipilih = elDompet.options[elDompet.selectedIndex]; let saldoTersedia = parseInt(optDipilih.dataset.saldo); let nmDompet = optDipilih.text.split(' (')[0]; 
-            
-            // FIX: Agar Tanggal Bebas Timezone (Tengah hari local time)
-            let tglInput = document.getElementById('out-tanggal').value; 
-            let tglSimpan = new Date(tglInput + "T12:00:00").toISOString();
-            
+            let tglInput = document.getElementById('out-tanggal').value; let tglSimpan = new Date(tglInput + "T12:00:00").toISOString();
             let ur = document.getElementById('out-uraian').value; let nom = parseInt(document.getElementById('out-nominal').value); 
             if(nom > saldoTersedia) { return Swal.fire({ title: 'Saldo Tidak Cukup!', text: `Gagal! Dompet ini hanya bersaldo Rp ${saldoTersedia.toLocaleString('id-ID')}.`, icon: 'error' }); } 
             
@@ -603,21 +581,18 @@
             let idTrx = push(ref(db, `transactions/${unit}`)).key; 
             await set(ref(db, `transactions/${unit}/${idTrx}`), { id: idTrx, tipe: 'OUT', dompet: idDompet, nama_dompet: nmDompet, tanggal: tglSimpan, uraian: ur, nominal: nom }); 
             
-            document.getElementById('form-pengeluaran').reset(); 
-            window.renderStatistik(); 
-            window.renderBKU(); // BKU UPDATE OTOMATIS
-            
-            Swal.fire({toast:true, position:'top-end', icon:'success', title:'Pengeluaran Tercatat', showConfirmButton:false, timer:1500}); 
+            document.getElementById('form-pengeluaran').reset(); window.renderStatistik(); window.renderBKU(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Pengeluaran Tercatat', showConfirmButton:false, timer:1500}); 
         };
         window.hapusTransaksi = (idTrx) => { Swal.fire({title: 'Hapus Transaksi?', text: 'Saldo akan disesuaikan.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'}).then(async (r) => { if(r.isConfirmed) { const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; await set(ref(db, `transactions/${unit}/${idTrx}`), null); window.renderStatistik(); window.renderBKU(); } }); };
 
-        // --- BUKU KAS UMUM (LOGIC REVISI) ---
+        // --- BUKU KAS UMUM (LOGIC REVISI INTEGER) ---
         window.renderBKU = async () => {
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
             const snap = await get(child(ref(db), `transactions/${unit}`));
             
-            const blnFilter = document.getElementById('bku-bulan').value; // '01' - '12' atau 'all'
-            const thnFilter = document.getElementById('bku-tahun').value;
+            const blnFilterVal = document.getElementById('bku-bulan').value;
+            const fltBln = blnFilterVal === 'all' ? -1 : parseInt(blnFilterVal); 
+            const fltThn = parseInt(document.getElementById('bku-tahun').value);
 
             let h = ''; let saldo = 0; let saldoAwal = 0;
             let totInBulan = 0, totOutBulan = 0;
@@ -629,34 +604,25 @@
                 let filteredArr = [];
 
                 arr.forEach(d => {
-                    let m = d.tipe==='IN'?d.nominal:0; let k = d.tipe==='OUT'?d.nominal:0;
+                    let m = parseInt(d.nominal) || 0; 
+                    let k = 0;
+                    if(d.tipe === 'OUT') { k = m; m = 0; }
+                    
                     let tTgl = new Date(d.tanggal);
-                    let tBln = String(tTgl.getMonth() + 1).padStart(2, '0');
-                    let tThn = String(tTgl.getFullYear());
+                    let tBln = tTgl.getMonth() + 1; // 1 to 12
+                    let tThn = tTgl.getFullYear();
 
-                    // HITUNG SALDO BERJALAN & SALDO AWAL BULAN/TAHUN INI
-                    if (blnFilter !== 'all') {
-                        if (parseInt(tThn) < parseInt(thnFilter) || (tThn === thnFilter && parseInt(tBln) < parseInt(blnFilter))) {
-                            saldoAwal += (m - k);
-                            saldo += (m - k);
-                        } else if (tThn === thnFilter && tBln === blnFilter) {
-                            saldo += (m - k);
-                            totInBulan += m; totOutBulan += k;
-                            filteredArr.push({...d, currentSaldo: saldo});
-                        }
-                    } else {
-                        if (parseInt(tThn) < parseInt(thnFilter)) {
-                            saldoAwal += (m - k);
-                            saldo += (m - k);
-                        } else if (tThn === thnFilter) {
-                            saldo += (m - k);
-                            totInBulan += m; totOutBulan += k;
-                            filteredArr.push({...d, currentSaldo: saldo});
-                        }
+                    if (tThn < fltThn || (tThn === fltThn && fltBln !== -1 && tBln < fltBln)) {
+                        saldoAwal += (m - k);
+                        saldo += (m - k);
+                    } else if (tThn === fltThn && (fltBln === -1 || tBln === fltBln)) {
+                        saldo += (m - k);
+                        totInBulan += m; totOutBulan += k;
+                        filteredArr.push({...d, currentSaldo: saldo});
                     }
                 });
 
-                if (saldoAwal !== 0 || blnFilter !== 'all' || thnFilter !== 'all') {
+                if (saldoAwal !== 0 || fltBln !== -1) {
                     h += `<tr class="bg-yellow-50 font-bold text-slate-700"><td colspan="2" class="p-3 border border-slate-300 text-center tracking-widest">SALDO AWAL</td><td class="p-3 border border-slate-300 text-right">-</td><td class="p-3 border border-slate-300 text-right">-</td><td class="p-3 border border-slate-300 text-right text-blue-900">${window.formatRp(saldoAwal)}</td></tr>`;
                 }
 
@@ -677,7 +643,116 @@
 
         window.cetakBKU = () => {
             document.getElementById('bku-tgl-cetak').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
-            document.body.className = 'print-bku'; window.print(); document.body.className = 'bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col';
+            document.body.className = 'print-bku bg-white'; window.print(); document.body.className = 'bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col';
+        };
+
+        // --- PENGATURAN / SETTINGS ---
+        window.simpanProfil = async (e) => {
+            e.preventDefault();
+            const s = JSON.parse(localStorage.getItem('sesi_kas_sekolah'));
+            let oldUid = s.uid;
+            let newUid = document.getElementById('set-username').value;
+            let newPass = document.getElementById('set-password').value;
+            let newNama = document.getElementById('set-nama').value;
+            
+            Swal.fire({title:'Menyimpan Profil...', didOpen:()=>Swal.showLoading()});
+            try {
+                let data = (await get(child(ref(db), `users/${oldUid}`))).val();
+                data.password = newPass; data.nama_admin = newNama;
+                
+                if(oldUid !== newUid) {
+                    let cek = await get(child(ref(db), `users/${newUid}`));
+                    if(cek.exists()) return Swal.fire('Error','Username sudah dipakai orang lain','error');
+                    await set(ref(db, `users/${newUid}`), data);
+                    await set(ref(db, `users/${oldUid}`), null);
+                } else {
+                    await set(ref(db, `users/${oldUid}`), data);
+                }
+                
+                s.uid = newUid; s.nama = newNama;
+                localStorage.setItem('sesi_kas_sekolah', JSON.stringify(s));
+                window.initDash(); Swal.fire('Sukses','Profil diperbarui!','success');
+            } catch(e) { Swal.fire('Error', e.message, 'error'); }
+        };
+
+        window.resetKeuangan = () => {
+            Swal.fire({title: 'Reset Keuangan?', text: 'Semua UANG KAS dan CATATAN PEMBAYARAN akan dihapus (Siswa jadi Belum Lunas semua). Yakin?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Ya, Reset!'}).then(async (r) => { 
+                if(r.isConfirmed) { 
+                    Swal.fire({title:'Mereset Data...', didOpen:()=>Swal.showLoading()});
+                    const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+                    await set(ref(db, `transactions/${unit}`), null); // hapus mutasi
+                    
+                    const billsSnap = await get(child(ref(db), `student_bills/${unit}`)); // Reset status bill
+                    if(billsSnap.exists()){
+                        let updates = {};
+                        billsSnap.forEach(stu => {
+                            stu.forEach(bill => {
+                                let b = bill.val();
+                                updates[`student_bills/${unit}/${stu.key}/${b.id}/terbayar`] = 0;
+                                updates[`student_bills/${unit}/${stu.key}/${b.id}/sisa`] = b.total;
+                                updates[`student_bills/${unit}/${stu.key}/${b.id}/status`] = 'BELUM';
+                            });
+                        });
+                        await update(ref(db), updates);
+                    }
+                    Swal.fire('Terhapus!', 'Data keuangan kembali ke 0.', 'success'); window.initDash();
+                } 
+            });
+        };
+
+        window.resetSiswa = () => {
+            Swal.fire({title: 'Reset SEMUA Data Siswa?', text: 'Seluruh Siswa dan Tagihannya akan LENYAP. Transaksi Kas akan tetap ada. Lanjutkan?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#b91c1c', confirmButtonText: 'Ya, Lenyapkan!'}).then(async (r) => { 
+                if(r.isConfirmed) { 
+                    Swal.fire({title:'Menghapus...', didOpen:()=>Swal.showLoading()});
+                    const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+                    await set(ref(db, `students/${unit}`), null);
+                    await set(ref(db, `student_bills/${unit}`), null);
+                    Swal.fire('Terhapus!', 'Semua Data Siswa Lenyap.', 'success'); window.initDash();
+                } 
+            });
+        };
+
+        window.backupData = async () => {
+            const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+            Swal.fire({title:'Menyiapkan Backup...', didOpen:()=>Swal.showLoading()});
+            const snap = await get(ref(db));
+            const allData = snap.val() || {};
+            const backupData = {
+                students: allData.students ? allData.students[unit] : null,
+                katalog_tagihan: allData.katalog_tagihan ? allData.katalog_tagihan[unit] : null,
+                student_bills: allData.student_bills ? allData.student_bills[unit] : null,
+                transactions: allData.transactions ? allData.transactions[unit] : null,
+            };
+            const blob = new Blob([JSON.stringify(backupData)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; 
+            a.download = `Backup_Kas_${unit}_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.json`;
+            a.click(); Swal.close();
+        };
+
+        window.prosesRestore = (input) => {
+            if(!input.files[0]) return;
+            Swal.fire({title: 'Restore Data?', text: 'Data saat ini akan TERTUMPUK oleh data dari file Backup. Lanjutkan?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#16a34a', confirmButtonText: 'Ya, Restore!'}).then((r) => { 
+                if(r.isConfirmed) { 
+                    Swal.fire({title:'Merestore...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
+                    const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            let updates = {};
+                            if(data.students) updates[`students/${unit}`] = data.students; else updates[`students/${unit}`] = null;
+                            if(data.katalog_tagihan) updates[`katalog_tagihan/${unit}`] = data.katalog_tagihan; else updates[`katalog_tagihan/${unit}`] = null;
+                            if(data.student_bills) updates[`student_bills/${unit}`] = data.student_bills; else updates[`student_bills/${unit}`] = null;
+                            if(data.transactions) updates[`transactions/${unit}`] = data.transactions; else updates[`transactions/${unit}`] = null;
+                            
+                            await update(ref(db), updates);
+                            Swal.fire('Restore Berhasil!', 'Data telah dikembalikan.', 'success'); window.initDash();
+                        } catch(err) { Swal.fire('Gagal!', 'File corrupt atau bukan file backup sistem.', 'error'); }
+                        input.value = ''; // reset input
+                    };
+                    reader.readAsText(input.files[0]);
+                } else { input.value = ''; }
+            });
         };
 
         window.addEventListener('DOMContentLoaded', () => { if(localStorage.getItem('sesi_kas_sekolah')) window.initDash(); });
