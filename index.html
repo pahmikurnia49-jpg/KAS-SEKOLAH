@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kas Sekolah Terpadu - v5.0</title>
+    <title>Sistem Kas Sekolah Terpadu - Final Build</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -17,6 +17,7 @@
         .hidden-section { display: none !important; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         
+        /* MANAJEMEN MODE PRINT */
         @media print {
             body.print-nota * { visibility: hidden; }
             body.print-nota #area-nota, body.print-nota #area-nota * { visibility: visible; }
@@ -60,6 +61,7 @@
         <table class="w-full text-left text-[10px] border-collapse border border-black">
             <thead>
                 <tr class="bg-gray-200">
+                    <th class="p-1.5 border border-black text-center">Tgl Bayar</th>
                     <th class="p-1.5 border border-black">Nama Tagihan</th>
                     <th class="p-1.5 border border-black text-right">Tagihan</th>
                     <th class="p-1.5 border border-black text-right">Terbayar</th>
@@ -278,7 +280,6 @@
                     <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2"><i class="fa-solid fa-gear text-primary mr-2"></i> Pengaturan Sistem</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        
                         <div class="bg-white p-5 rounded-xl shadow-sm border">
                             <h3 class="font-bold mb-4 border-b pb-2 text-slate-700"><i class="fa-solid fa-user-shield text-blue-500 mr-2"></i> Ubah Profil & Password</h3>
                             <form id="form-setting-profil" onsubmit="window.simpanProfil(event)" class="space-y-4">
@@ -294,7 +295,6 @@
                             <p class="text-xs text-gray-500 mb-4">Simpan cadangan data Anda secara rutin, atau kembalikan data dari file cadangan (.json).</p>
                             <div class="space-y-3">
                                 <button onclick="window.backupData()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg font-bold text-sm transition flex justify-center items-center gap-2"><i class="fa-solid fa-download"></i> Download Backup Data</button>
-                                
                                 <input type="file" id="file-restore" class="hidden" accept=".json" onchange="window.prosesRestore(this)">
                                 <button onclick="document.getElementById('file-restore').click()" class="w-full border-2 border-slate-300 text-slate-600 hover:bg-slate-100 py-2.5 rounded-lg font-bold text-sm transition flex justify-center items-center gap-2"><i class="fa-solid fa-upload"></i> Restore Data dari File</button>
                             </div>
@@ -308,7 +308,6 @@
                                 <button onclick="window.resetSiswa()" class="w-full bg-red-700 hover:bg-red-800 text-white py-2 rounded-lg font-bold text-sm transition shadow-sm"><i class="fa-solid fa-users-slash mr-1"></i> Reset Semua Data Siswa</button>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
@@ -377,12 +376,9 @@
             document.getElementById('dash-user-name').innerText = s.nama; document.getElementById('dash-unit').innerText = s.unit;
             document.getElementById('bku-nama-admin').innerText = s.nama; document.getElementById('cetak-riwayat-admin').innerText = s.nama;
             
-            // Isi form Profil
-            document.getElementById('set-nama').value = s.nama;
-            document.getElementById('set-username').value = s.uid;
+            document.getElementById('set-nama').value = s.nama; document.getElementById('set-username').value = s.uid;
 
-            let currentYear = new Date().getFullYear();
-            let yearOptions = '';
+            let currentYear = new Date().getFullYear(); let yearOptions = '';
             for(let i = 2023; i <= currentYear + 2; i++) { yearOptions += `<option value="${i}">${i}</option>`; }
             document.getElementById('bku-tahun').innerHTML = yearOptions;
             document.getElementById('bku-bulan').value = String(new Date().getMonth() + 1);
@@ -406,10 +402,7 @@
             if(id==='menu-bku') window.renderBKU();
         };
 
-        setInterval(() => {
-            let d = new Date();
-            if(document.getElementById('realtime-time')) { document.getElementById('realtime-time').innerText = d.toLocaleTimeString('id-ID', {hour12: false}); document.getElementById('realtime-date').innerText = d.toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}); }
-        }, 1000);
+        setInterval(() => { let d = new Date(); if(document.getElementById('realtime-time')) { document.getElementById('realtime-time').innerText = d.toLocaleTimeString('id-ID', {hour12: false}); document.getElementById('realtime-date').innerText = d.toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}); } }, 1000);
 
         // --- SISWA & KATALOG ---
         window.switchMasterTab = (t) => { document.getElementById('tab-content-siswa').classList.toggle('hidden', t!=='siswa'); document.getElementById('tab-content-tagihan').classList.toggle('hidden', t!=='tagihan'); document.getElementById('tab-btn-siswa').className = t==='siswa' ? 'px-4 py-2 text-blue-600 font-bold border-b-2 border-blue-600' : 'px-4 py-2 text-gray-500 font-bold'; document.getElementById('tab-btn-tagihan').className = t==='tagihan' ? 'px-4 py-2 text-blue-600 font-bold border-b-2 border-blue-600' : 'px-4 py-2 text-gray-500 font-bold'; };
@@ -425,23 +418,14 @@
         window.cekTargetKhusus = () => { document.getElementById('area-target-khusus').classList.toggle('hidden', document.getElementById('pilih-target').value !== 'KHUSUS'); };
 
         window.terapkanTagihan = async () => { 
-            const cbKat = document.querySelectorAll('.cb-kat:checked'); 
-            if(cbKat.length === 0) return Swal.fire('Error','Pilih minimal 1 tagihan dari checkbox','warning'); 
-            const target = document.getElementById('pilih-target').value; 
-            let targetNisArr = []; 
-            if(target === 'KHUSUS') { 
-                document.querySelectorAll('.cb-siswa-manual:checked').forEach(e => targetNisArr.push(e.value)); 
-                if(targetNisArr.length===0) return Swal.fire('Error','Pilih minimal 1 siswa manual','warning'); 
-            } 
+            const cbKat = document.querySelectorAll('.cb-kat:checked'); if(cbKat.length === 0) return Swal.fire('Error','Pilih minimal 1 tagihan dari checkbox','warning'); 
+            const target = document.getElementById('pilih-target').value; let targetNisArr = []; 
+            if(target === 'KHUSUS') { document.querySelectorAll('.cb-siswa-manual:checked').forEach(e => targetNisArr.push(e.value)); if(targetNisArr.length===0) return Swal.fire('Error','Pilih minimal 1 siswa manual','warning'); } 
             Swal.fire({title:'Menyebar Tagihan...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()}); 
-            
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; 
             const snapSis = await get(child(ref(db), `students/${unit}`)); 
-            const snapBills = await get(child(ref(db), `student_bills/${unit}`));
-            const existingBills = snapBills.val() || {};
-
+            const snapBills = await get(child(ref(db), `student_bills/${unit}`)); const existingBills = snapBills.val() || {};
             let countBerhasil = 0; let countDilewati = 0;
-
             if(snapSis.exists()) { 
                 const updates = {}; 
                 snapSis.forEach(cs => { 
@@ -450,19 +434,11 @@
                         let studentBills = existingBills[s.nis] || {};
                         cbKat.forEach(cKat => { 
                             let sudahPunya = Object.values(studentBills).some(b => b.id_katalog === cKat.value);
-                            if(!sudahPunya) {
-                                let idT = push(child(ref(db), 'dumb')).key; 
-                                updates[`student_bills/${unit}/${s.nis}/${idT}`] = { 
-                                    id: idT, id_katalog: cKat.value, nama_tagihan: cKat.dataset.nama, 
-                                    total: parseInt(cKat.dataset.nom), terbayar: 0, sisa: parseInt(cKat.dataset.nom), status: 'BELUM' 
-                                }; countBerhasil++;
-                            } else { countDilewati++; }
+                            if(!sudahPunya) { let idT = push(child(ref(db), 'dumb')).key; updates[`student_bills/${unit}/${s.nis}/${idT}`] = { id: idT, id_katalog: cKat.value, nama_tagihan: cKat.dataset.nama, total: parseInt(cKat.dataset.nom), terbayar: 0, sisa: parseInt(cKat.dataset.nom), status: 'BELUM' }; countBerhasil++; } else { countDilewati++; }
                         }); 
                     } 
                 }); 
-                if(Object.keys(updates).length > 0) {
-                    await update(ref(db), updates); Swal.fire('Sukses', `Menambah ${countBerhasil} tagihan baru. (${countDilewati} di-skip karena sudah punya)`, 'success'); 
-                } else { Swal.fire('Info', 'Semua siswa di target ini sudah memiliki tagihan tersebut.', 'info'); }
+                if(Object.keys(updates).length > 0) { await update(ref(db), updates); Swal.fire('Sukses', `Menambah ${countBerhasil} tagihan baru. (${countDilewati} di-skip karena sudah punya)`, 'success'); } else { Swal.fire('Info', 'Semua siswa di target ini sudah memiliki tagihan tersebut.', 'info'); }
                 document.querySelectorAll('.cb-kat').forEach(c => c.checked = false); 
             } 
         };
@@ -473,7 +449,6 @@
         window.pilihSiswaKasir = async (nis, nama) => {
             document.getElementById('kasir-area-placeholder').classList.add('hidden'); document.getElementById('kasir-area-tagihan').classList.remove('hidden');
             document.getElementById('kasir-nama-siswa').innerText = nama; document.getElementById('kasir-nis-siswa').innerText = nis;
-            
             Swal.fire({title:'Memuat Tagihan...', didOpen:()=>Swal.showLoading()});
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
             const snap = await get(child(ref(db), `student_bills/${unit}/${nis}`));
@@ -482,52 +457,57 @@
             if(snap.exists()) {
                 snap.forEach(c => {
                     let b = c.val();
+                    
+                    // PERBAIKAN: Set Data Atribut terbayar untuk Kalkulasi Pemasukan Selanjutnya
+                    let trb = b.terbayar || 0; 
+                    let tglText = b.tgl_bayar ? new Date(b.tgl_bayar).toLocaleDateString('id-ID') : '-';
+
                     if(b.status !== 'LUNAS') {
-                        h += `<tr><td class="p-3"><input type="checkbox" class="cb-bayar accent-primary w-4 h-4" value="${b.id}" data-nama="${b.nama_tagihan}" data-sisa="${b.sisa}" data-kat="${b.id_katalog}"></td><td class="p-3 font-bold text-slate-700">${b.nama_tagihan}</td><td class="p-3 text-slate-500">${window.formatRp(b.total)}</td><td class="p-3 text-red-600 font-black">${window.formatRp(b.sisa)}</td><td class="p-3"><span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-1 rounded font-bold">${b.status}</span></td><td class="p-3 text-center"><button onclick="window.bayarCustom('${nis}','${b.id}','${b.nama_tagihan}',${b.sisa},'${b.id_katalog}')" class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg font-bold transition">Bayar Custom</button></td></tr>`;
+                        h += `<tr><td class="p-3"><input type="checkbox" class="cb-bayar accent-primary w-4 h-4" value="${b.id}" data-nama="${b.nama_tagihan}" data-sisa="${b.sisa}" data-kat="${b.id_katalog}" data-terbayar="${trb}"></td><td class="p-3 font-bold text-slate-700">${b.nama_tagihan}</td><td class="p-3 text-slate-500">${window.formatRp(b.total)}</td><td class="p-3 text-red-600 font-black">${window.formatRp(b.sisa)}</td><td class="p-3"><span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-1 rounded font-bold">${b.status}</span></td><td class="p-3 text-center"><button onclick="window.bayarCustom('${nis}','${b.id}','${b.nama_tagihan}',${b.sisa},'${b.id_katalog}',${trb})" class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg font-bold transition">Bayar Custom</button></td></tr>`;
                     } else {
                         h += `<tr class="bg-slate-50"><td class="p-3"></td><td class="p-3 text-gray-500">${b.nama_tagihan}</td><td class="p-3 text-gray-400">${window.formatRp(b.total)}</td><td class="p-3 text-gray-400">Rp 0</td><td class="p-3"><span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded font-bold">LUNAS</span></td><td class="p-3 text-center"><button onclick="window.batalBayar('${nis}','${b.id}',${b.total})" class="text-[10px] text-red-400 hover:text-red-600 font-bold underline">Batalkan</button></td></tr>`;
                     }
 
+                    // PERBAIKAN: Ada Kolom Tgl Bayar di Kartu A5
                     let cetakWarna = b.status === 'LUNAS' ? 'text-green-700' : (b.status === 'BELUM' ? 'text-red-600' : 'text-yellow-600');
-                    hCetak += `<tr><td class="p-1.5 border border-black truncate max-w-[120px]">${b.nama_tagihan}</td><td class="p-1.5 border border-black text-right">${window.formatRp(b.total)}</td><td class="p-1.5 border border-black text-right">${window.formatRp(b.terbayar)}</td><td class="p-1.5 border border-black text-right font-bold">${window.formatRp(b.sisa)}</td><td class="p-1.5 border border-black text-center font-bold ${cetakWarna}">${b.status}</td></tr>`;
+                    hCetak += `<tr><td class="p-1.5 border border-black text-center">${tglText}</td><td class="p-1.5 border border-black truncate max-w-[120px]">${b.nama_tagihan}</td><td class="p-1.5 border border-black text-right">${window.formatRp(b.total)}</td><td class="p-1.5 border border-black text-right">${window.formatRp(trb)}</td><td class="p-1.5 border border-black text-right font-bold">${window.formatRp(b.sisa)}</td><td class="p-1.5 border border-black text-center font-bold ${cetakWarna}">${b.status}</td></tr>`;
                 });
-            } else { h = '<tr><td colspan="6" class="p-6 text-center text-gray-400">Tidak ada tagihan aktif untuk siswa ini.</td></tr>'; hCetak = '<tr><td colspan="5" class="p-4 text-center">Belum ada riwayat tagihan.</td></tr>'; }
+            } else { h = '<tr><td colspan="6" class="p-6 text-center text-gray-400">Tidak ada tagihan aktif.</td></tr>'; hCetak = '<tr><td colspan="6" class="p-4 text-center">Belum ada riwayat tagihan.</td></tr>'; }
             
-            document.getElementById('kasir-table-tagihan').innerHTML = h; 
-            document.getElementById('cetak-riwayat-body').innerHTML = hCetak;
-            Swal.close();
+            document.getElementById('kasir-table-tagihan').innerHTML = h; document.getElementById('cetak-riwayat-body').innerHTML = hCetak; Swal.close();
         };
 
         window.cetakRiwayatPDF = () => {
             document.getElementById('cetak-riwayat-nama').innerText = document.getElementById('kasir-nama-siswa').innerText;
             document.getElementById('cetak-riwayat-nis').innerText = document.getElementById('kasir-nis-siswa').innerText;
             document.getElementById('cetak-riwayat-tgl').innerText = new Date().toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
-            let areaCetak = document.getElementById('area-cetak-riwayat');
-            areaCetak.classList.remove('hidden'); 
+            let areaCetak = document.getElementById('area-cetak-riwayat'); areaCetak.classList.remove('hidden'); 
             document.body.className = 'print-riwayat bg-white'; window.print();
             document.body.className = 'bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col'; areaCetak.classList.add('hidden');
         };
 
         window.checkAllKasir = (el) => { document.querySelectorAll('.cb-bayar').forEach(c => c.checked = el.checked); };
-        window.bayarCustom = async (nis, bId, bNama, bSisa, bKatId) => { const { value: nominal } = await Swal.fire({ title: `Bayar Sebagian`, text: `${bNama} (Sisa: Rp ${bSisa})`, input: 'number', inputPlaceholder: 'Ketik nominal uang...', showCancelButton: true, confirmButtonText: 'Proses' }); if(nominal) { let bayar = parseInt(nominal); if(bayar > bSisa) return Swal.fire('Error','Nominal melebihi sisa tagihan!','error'); if(bayar <= 0) return Swal.fire('Error','Nominal tidak valid','error'); await prosesTransaksi(nis, [{id:bId, nama:bNama, bayar:bayar, sisa_lama:bSisa, id_kat:bKatId}]); } };
-        window.prosesBayarTerpilih = async () => { let cbs = document.querySelectorAll('.cb-bayar:checked'); if(cbs.length===0) return Swal.fire('Oops','Pilih dulu tagihan yang mau dibayar dengan mencentang kotak di tabel.','warning'); let nis = document.getElementById('kasir-nis-siswa').innerText; let items = []; let total = 0; let nms = []; cbs.forEach(c => { items.push({id: c.value, nama: c.dataset.nama, bayar: parseInt(c.dataset.sisa), sisa_lama: parseInt(c.dataset.sisa), id_kat: c.dataset.kat}); total += parseInt(c.dataset.sisa); nms.push(c.dataset.nama); }); Swal.fire({ title: 'Konfirmasi Pembayaran', html: `Bayar LUNAS tagihan berikut:<br><b class="text-sm text-primary">${nms.join(', ')}</b><br><br>Total: <b class="text-xl text-green-600">${window.formatRp(total)}</b>`, icon: 'question', showCancelButton: true, confirmButtonColor: '#16a34a', confirmButtonText: 'Ya, Bayar Lunas!' }).then(async (r) => { if(r.isConfirmed) await prosesTransaksi(nis, items); }); };
+        window.bayarCustom = async (nis, bId, bNama, bSisa, bKatId, bTerbayar) => { const { value: nominal } = await Swal.fire({ title: `Bayar Sebagian`, text: `${bNama} (Sisa: Rp ${bSisa})`, input: 'number', inputPlaceholder: 'Ketik nominal uang...', showCancelButton: true, confirmButtonText: 'Proses' }); if(nominal) { let bayar = parseInt(nominal); if(bayar > bSisa) return Swal.fire('Error','Nominal melebihi sisa tagihan!','error'); if(bayar <= 0) return Swal.fire('Error','Nominal tidak valid','error'); await prosesTransaksi(nis, [{id:bId, nama:bNama, bayar:bayar, sisa_lama:bSisa, id_kat:bKatId, terbayar_lama:bTerbayar}]); } };
+        window.prosesBayarTerpilih = async () => { let cbs = document.querySelectorAll('.cb-bayar:checked'); if(cbs.length===0) return Swal.fire('Oops','Pilih dulu tagihan yang mau dibayar dengan mencentang kotak di tabel.','warning'); let nis = document.getElementById('kasir-nis-siswa').innerText; let items = []; let total = 0; let nms = []; cbs.forEach(c => { items.push({id: c.value, nama: c.dataset.nama, bayar: parseInt(c.dataset.sisa), sisa_lama: parseInt(c.dataset.sisa), id_kat: c.dataset.kat, terbayar_lama: parseInt(c.dataset.terbayar)}); total += parseInt(c.dataset.sisa); nms.push(c.dataset.nama); }); Swal.fire({ title: 'Konfirmasi Pembayaran', html: `Bayar LUNAS tagihan berikut:<br><b class="text-sm text-primary">${nms.join(', ')}</b><br><br>Total: <b class="text-xl text-green-600">${window.formatRp(total)}</b>`, icon: 'question', showCancelButton: true, confirmButtonColor: '#16a34a', confirmButtonText: 'Ya, Bayar Lunas!' }).then(async (r) => { if(r.isConfirmed) await prosesTransaksi(nis, items); }); };
 
         async function prosesTransaksi(nis, items) {
             Swal.fire({title:'Memproses...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            const dateStrNow = new Date().toISOString(); 
-            let notaHTML = ''; let totalBayar = 0; const updates = {};
+            const dateStrNow = new Date().toISOString(); let notaHTML = ''; let totalBayar = 0; const updates = {};
             const namaSiswa = document.getElementById('kasir-nama-siswa').innerText;
             
             items.forEach(it => {
                 let sisaBaru = it.sisa_lama - it.bayar;
-                let terbayarBaru = parseInt(it.bayar); 
+                // PERBAIKAN: Uang ditambahkan/diakumulasi ke terbayar_lama
+                let terbayarBaru = it.terbayar_lama + it.bayar; 
                 
                 updates[`student_bills/${unit}/${nis}/${it.id}/terbayar`] = terbayarBaru; 
                 updates[`student_bills/${unit}/${nis}/${it.id}/sisa`] = sisaBaru;
                 updates[`student_bills/${unit}/${nis}/${it.id}/status`] = sisaBaru <= 0 ? 'LUNAS' : 'SEBAGIAN';
+                // SIMPAN TANGGAL BAYAR TERAKHIR
+                updates[`student_bills/${unit}/${nis}/${it.id}/tgl_bayar`] = dateStrNow;
                 
-                let idTrx = push(ref(db, `transactions/${unit}`)).key; 
+                let idTrx = push(child(ref(db), `transactions/${unit}`)).key; 
                 updates[`transactions/${unit}/${idTrx}`] = { 
                     id: idTrx, tipe: 'IN', dompet: it.id_kat, nama_dompet: it.nama, 
                     tanggal: dateStrNow, uraian: `Terima ${it.nama} - ${namaSiswa} (${nis})`, nominal: it.bayar 
@@ -546,7 +526,7 @@
                 if(r.isConfirmed) { let areaNota = document.getElementById('area-nota'); areaNota.classList.remove('hidden'); document.body.className = 'print-nota bg-white'; window.print(); document.body.className = 'bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col'; areaNota.classList.add('hidden'); }
             });
         }
-        window.batalBayar = (nis, bId, total) => { Swal.fire({title: 'Batalkan Status Lunas?', text: 'Pemasukan di BKU harus dihapus secara manual di menu Pengeluaran jika diperlukan.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'}).then(async (r) => { if(r.isConfirmed) { const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; await update(ref(db, `student_bills/${unit}/${nis}/${bId}`), { status: 'BELUM', terbayar: 0, sisa: total }); window.pilihSiswaKasir(nis, document.getElementById('kasir-nama-siswa').innerText); } }); };
+        window.batalBayar = (nis, bId, total) => { Swal.fire({title: 'Batalkan Status Lunas?', text: 'Pemasukan di BKU harus dihapus secara manual di menu Pengeluaran jika diperlukan.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'}).then(async (r) => { if(r.isConfirmed) { const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; await update(ref(db, `student_bills/${unit}/${nis}/${bId}`), { status: 'BELUM', terbayar: 0, sisa: total, tgl_bayar: null }); window.pilihSiswaKasir(nis, document.getElementById('kasir-nama-siswa').innerText); } }); };
 
         // --- PENGELUARAN ---
         window.renderStatistik = async () => {
@@ -556,7 +536,10 @@
 
             if(snapTrx.exists()){
                 snapTrx.forEach(c => {
-                    let t = c.val(); let tTgl = new Date(t.tanggal);
+                    let t = c.val(); 
+                    // PROTEKSI TANGGAL (Jika Invalid Data Lama)
+                    let tTgl = new Date(t.tanggal); if(isNaN(tTgl.getTime())) tTgl = new Date();
+                    
                     if(t.tipe==='IN'){ totIn+=t.nominal; if(tTgl.getMonth() === blnSkrg && tTgl.getFullYear() === thnSkrg) inBulan += t.nominal; if(dompets[t.dompet]) dompets[t.dompet].saldo += t.nominal; }
                     if(t.tipe==='OUT'){ totOut+=t.nominal; if(tTgl.getMonth() === blnSkrg && tTgl.getFullYear() === thnSkrg) outBulan += t.nominal; if(dompets[t.dompet]) dompets[t.dompet].saldo -= t.nominal; arrOut.push(t); }
                 });
@@ -573,7 +556,11 @@
             e.preventDefault(); 
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; 
             let elDompet = document.getElementById('out-dompet'); let idDompet = elDompet.value; let optDipilih = elDompet.options[elDompet.selectedIndex]; let saldoTersedia = parseInt(optDipilih.dataset.saldo); let nmDompet = optDipilih.text.split(' (')[0]; 
-            let tglInput = document.getElementById('out-tanggal').value; let tglSimpan = new Date(tglInput + "T12:00:00").toISOString();
+            
+            let tglInput = document.getElementById('out-tanggal').value; 
+            // PERBAIKAN: Parsing tanggal 100% aman (UTC)
+            let tglSimpan = new Date(tglInput).toISOString(); 
+            
             let ur = document.getElementById('out-uraian').value; let nom = parseInt(document.getElementById('out-nominal').value); 
             if(nom > saldoTersedia) { return Swal.fire({ title: 'Saldo Tidak Cukup!', text: `Gagal! Dompet ini hanya bersaldo Rp ${saldoTersedia.toLocaleString('id-ID')}.`, icon: 'error' }); } 
             
@@ -585,7 +572,7 @@
         };
         window.hapusTransaksi = (idTrx) => { Swal.fire({title: 'Hapus Transaksi?', text: 'Saldo akan disesuaikan.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'}).then(async (r) => { if(r.isConfirmed) { const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; await set(ref(db, `transactions/${unit}/${idTrx}`), null); window.renderStatistik(); window.renderBKU(); } }); };
 
-        // --- BUKU KAS UMUM (LOGIC REVISI INTEGER) ---
+        // --- BUKU KAS UMUM (DENGAN TANGGAL AMAN) ---
         window.renderBKU = async () => {
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
             const snap = await get(child(ref(db), `transactions/${unit}`));
@@ -608,7 +595,9 @@
                     let k = 0;
                     if(d.tipe === 'OUT') { k = m; m = 0; }
                     
-                    let tTgl = new Date(d.tanggal);
+                    // FALLBACK AMAN
+                    let tTgl = new Date(d.tanggal); if(isNaN(tTgl.getTime())) tTgl = new Date();
+                    
                     let tBln = tTgl.getMonth() + 1; // 1 to 12
                     let tThn = tTgl.getFullYear();
 
@@ -618,7 +607,7 @@
                     } else if (tThn === fltThn && (fltBln === -1 || tBln === fltBln)) {
                         saldo += (m - k);
                         totInBulan += m; totOutBulan += k;
-                        filteredArr.push({...d, currentSaldo: saldo});
+                        filteredArr.push({...d, currentSaldo: saldo, safeDate: tTgl});
                     }
                 });
 
@@ -631,7 +620,7 @@
                 } else {
                     filteredArr.forEach(d => {
                         let m = d.tipe==='IN'?d.nominal:0; let k = d.tipe==='OUT'?d.nominal:0;
-                        h += `<tr class="hover:bg-slate-50"><td class="p-3 border border-slate-300 whitespace-nowrap">${new Date(d.tanggal).toLocaleDateString('id-ID')}</td><td class="p-3 border border-slate-300">${d.uraian} <br><span class="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold inline-block mt-1">Dompet: ${d.nama_dompet||'Umum'}</span></td><td class="p-3 border border-slate-300 text-right font-mono text-green-700">${m>0?window.formatRp(m):'-'}</td><td class="p-3 border border-slate-300 text-right font-mono text-red-700">${k>0?window.formatRp(k):'-'}</td><td class="p-3 border border-slate-300 text-right font-mono font-black text-blue-900 bg-blue-50/30 print:bg-white">${window.formatRp(d.currentSaldo)}</td></tr>`;
+                        h += `<tr class="hover:bg-slate-50"><td class="p-3 border border-slate-300 whitespace-nowrap">${d.safeDate.toLocaleDateString('id-ID')}</td><td class="p-3 border border-slate-300">${d.uraian} <br><span class="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold inline-block mt-1">Dompet: ${d.nama_dompet||'Umum'}</span></td><td class="p-3 border border-slate-300 text-right font-mono text-green-700">${m>0?window.formatRp(m):'-'}</td><td class="p-3 border border-slate-300 text-right font-mono text-red-700">${k>0?window.formatRp(k):'-'}</td><td class="p-3 border border-slate-300 text-right font-mono font-black text-blue-900 bg-blue-50/30 print:bg-white">${window.formatRp(d.currentSaldo)}</td></tr>`;
                     });
                 }
                 h += `<tr class="bg-slate-200 font-bold text-slate-800"><td colspan="2" class="p-3 border border-slate-300 text-center uppercase">Total Mutasi & Saldo Akhir Periode</td><td class="p-3 border border-slate-300 text-right text-green-700">${window.formatRp(totInBulan)}</td><td class="p-3 border border-slate-300 text-right text-red-700">${window.formatRp(totOutBulan)}</td><td class="p-3 border border-slate-300 text-right text-blue-900">${window.formatRp(saldo)}</td></tr>`;
@@ -641,119 +630,14 @@
             document.getElementById('table-bku').innerHTML = h;
         };
 
-        window.cetakBKU = () => {
-            document.getElementById('bku-tgl-cetak').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
-            document.body.className = 'print-bku bg-white'; window.print(); document.body.className = 'bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col';
-        };
+        window.cetakBKU = () => { document.getElementById('bku-tgl-cetak').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}); document.body.className = 'print-bku bg-white'; window.print(); document.body.className = 'bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col'; };
 
         // --- PENGATURAN / SETTINGS ---
-        window.simpanProfil = async (e) => {
-            e.preventDefault();
-            const s = JSON.parse(localStorage.getItem('sesi_kas_sekolah'));
-            let oldUid = s.uid;
-            let newUid = document.getElementById('set-username').value;
-            let newPass = document.getElementById('set-password').value;
-            let newNama = document.getElementById('set-nama').value;
-            
-            Swal.fire({title:'Menyimpan Profil...', didOpen:()=>Swal.showLoading()});
-            try {
-                let data = (await get(child(ref(db), `users/${oldUid}`))).val();
-                data.password = newPass; data.nama_admin = newNama;
-                
-                if(oldUid !== newUid) {
-                    let cek = await get(child(ref(db), `users/${newUid}`));
-                    if(cek.exists()) return Swal.fire('Error','Username sudah dipakai orang lain','error');
-                    await set(ref(db, `users/${newUid}`), data);
-                    await set(ref(db, `users/${oldUid}`), null);
-                } else {
-                    await set(ref(db, `users/${oldUid}`), data);
-                }
-                
-                s.uid = newUid; s.nama = newNama;
-                localStorage.setItem('sesi_kas_sekolah', JSON.stringify(s));
-                window.initDash(); Swal.fire('Sukses','Profil diperbarui!','success');
-            } catch(e) { Swal.fire('Error', e.message, 'error'); }
-        };
-
-        window.resetKeuangan = () => {
-            Swal.fire({title: 'Reset Keuangan?', text: 'Semua UANG KAS dan CATATAN PEMBAYARAN akan dihapus (Siswa jadi Belum Lunas semua). Yakin?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Ya, Reset!'}).then(async (r) => { 
-                if(r.isConfirmed) { 
-                    Swal.fire({title:'Mereset Data...', didOpen:()=>Swal.showLoading()});
-                    const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-                    await set(ref(db, `transactions/${unit}`), null); // hapus mutasi
-                    
-                    const billsSnap = await get(child(ref(db), `student_bills/${unit}`)); // Reset status bill
-                    if(billsSnap.exists()){
-                        let updates = {};
-                        billsSnap.forEach(stu => {
-                            stu.forEach(bill => {
-                                let b = bill.val();
-                                updates[`student_bills/${unit}/${stu.key}/${b.id}/terbayar`] = 0;
-                                updates[`student_bills/${unit}/${stu.key}/${b.id}/sisa`] = b.total;
-                                updates[`student_bills/${unit}/${stu.key}/${b.id}/status`] = 'BELUM';
-                            });
-                        });
-                        await update(ref(db), updates);
-                    }
-                    Swal.fire('Terhapus!', 'Data keuangan kembali ke 0.', 'success'); window.initDash();
-                } 
-            });
-        };
-
-        window.resetSiswa = () => {
-            Swal.fire({title: 'Reset SEMUA Data Siswa?', text: 'Seluruh Siswa dan Tagihannya akan LENYAP. Transaksi Kas akan tetap ada. Lanjutkan?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#b91c1c', confirmButtonText: 'Ya, Lenyapkan!'}).then(async (r) => { 
-                if(r.isConfirmed) { 
-                    Swal.fire({title:'Menghapus...', didOpen:()=>Swal.showLoading()});
-                    const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-                    await set(ref(db, `students/${unit}`), null);
-                    await set(ref(db, `student_bills/${unit}`), null);
-                    Swal.fire('Terhapus!', 'Semua Data Siswa Lenyap.', 'success'); window.initDash();
-                } 
-            });
-        };
-
-        window.backupData = async () => {
-            const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            Swal.fire({title:'Menyiapkan Backup...', didOpen:()=>Swal.showLoading()});
-            const snap = await get(ref(db));
-            const allData = snap.val() || {};
-            const backupData = {
-                students: allData.students ? allData.students[unit] : null,
-                katalog_tagihan: allData.katalog_tagihan ? allData.katalog_tagihan[unit] : null,
-                student_bills: allData.student_bills ? allData.student_bills[unit] : null,
-                transactions: allData.transactions ? allData.transactions[unit] : null,
-            };
-            const blob = new Blob([JSON.stringify(backupData)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; 
-            a.download = `Backup_Kas_${unit}_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.json`;
-            a.click(); Swal.close();
-        };
-
-        window.prosesRestore = (input) => {
-            if(!input.files[0]) return;
-            Swal.fire({title: 'Restore Data?', text: 'Data saat ini akan TERTUMPUK oleh data dari file Backup. Lanjutkan?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#16a34a', confirmButtonText: 'Ya, Restore!'}).then((r) => { 
-                if(r.isConfirmed) { 
-                    Swal.fire({title:'Merestore...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
-                    const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-                    const reader = new FileReader();
-                    reader.onload = async (e) => {
-                        try {
-                            const data = JSON.parse(e.target.result);
-                            let updates = {};
-                            if(data.students) updates[`students/${unit}`] = data.students; else updates[`students/${unit}`] = null;
-                            if(data.katalog_tagihan) updates[`katalog_tagihan/${unit}`] = data.katalog_tagihan; else updates[`katalog_tagihan/${unit}`] = null;
-                            if(data.student_bills) updates[`student_bills/${unit}`] = data.student_bills; else updates[`student_bills/${unit}`] = null;
-                            if(data.transactions) updates[`transactions/${unit}`] = data.transactions; else updates[`transactions/${unit}`] = null;
-                            
-                            await update(ref(db), updates);
-                            Swal.fire('Restore Berhasil!', 'Data telah dikembalikan.', 'success'); window.initDash();
-                        } catch(err) { Swal.fire('Gagal!', 'File corrupt atau bukan file backup sistem.', 'error'); }
-                        input.value = ''; // reset input
-                    };
-                    reader.readAsText(input.files[0]);
-                } else { input.value = ''; }
-            });
-        };
+        window.simpanProfil = async (e) => { e.preventDefault(); const s = JSON.parse(localStorage.getItem('sesi_kas_sekolah')); let oldUid = s.uid; let newUid = document.getElementById('set-username').value; let newPass = document.getElementById('set-password').value; let newNama = document.getElementById('set-nama').value; Swal.fire({title:'Menyimpan Profil...', didOpen:()=>Swal.showLoading()}); try { let data = (await get(child(ref(db), `users/${oldUid}`))).val(); data.password = newPass; data.nama_admin = newNama; if(oldUid !== newUid) { let cek = await get(child(ref(db), `users/${newUid}`)); if(cek.exists()) return Swal.fire('Error','Username sudah dipakai orang lain','error'); await set(ref(db, `users/${newUid}`), data); await set(ref(db, `users/${oldUid}`), null); } else { await set(ref(db, `users/${oldUid}`), data); } s.uid = newUid; s.nama = newNama; localStorage.setItem('sesi_kas_sekolah', JSON.stringify(s)); window.initDash(); Swal.fire('Sukses','Profil diperbarui!','success'); } catch(e) { Swal.fire('Error', e.message, 'error'); } };
+        window.resetKeuangan = () => { Swal.fire({title: 'Reset Keuangan?', text: 'Semua UANG KAS dan CATATAN PEMBAYARAN akan dihapus (Siswa jadi Belum Lunas semua). Yakin?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Ya, Reset!'}).then(async (r) => { if(r.isConfirmed) { Swal.fire({title:'Mereset Data...', didOpen:()=>Swal.showLoading()}); const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; await set(ref(db, `transactions/${unit}`), null); const billsSnap = await get(child(ref(db), `student_bills/${unit}`)); if(billsSnap.exists()){ let updates = {}; billsSnap.forEach(stu => { stu.forEach(bill => { let b = bill.val(); updates[`student_bills/${unit}/${stu.key}/${b.id}/terbayar`] = 0; updates[`student_bills/${unit}/${stu.key}/${b.id}/sisa`] = b.total; updates[`student_bills/${unit}/${stu.key}/${b.id}/status`] = 'BELUM'; updates[`student_bills/${unit}/${stu.key}/${b.id}/tgl_bayar`] = null; }); }); await update(ref(db), updates); } Swal.fire('Terhapus!', 'Data keuangan kembali ke 0.', 'success'); window.initDash(); } }); };
+        window.resetSiswa = () => { Swal.fire({title: 'Reset SEMUA Data Siswa?', text: 'Seluruh Siswa dan Tagihannya akan LENYAP. Transaksi Kas akan tetap ada. Lanjutkan?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#b91c1c', confirmButtonText: 'Ya, Lenyapkan!'}).then(async (r) => { if(r.isConfirmed) { Swal.fire({title:'Menghapus...', didOpen:()=>Swal.showLoading()}); const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; await set(ref(db, `students/${unit}`), null); await set(ref(db, `student_bills/${unit}`), null); Swal.fire('Terhapus!', 'Semua Data Siswa Lenyap.', 'success'); window.initDash(); } }); };
+        window.backupData = async () => { const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; Swal.fire({title:'Menyiapkan Backup...', didOpen:()=>Swal.showLoading()}); const snap = await get(ref(db)); const allData = snap.val() || {}; const backupData = { students: allData.students ? allData.students[unit] : null, katalog_tagihan: allData.katalog_tagihan ? allData.katalog_tagihan[unit] : null, student_bills: allData.student_bills ? allData.student_bills[unit] : null, transactions: allData.transactions ? allData.transactions[unit] : null, }; const blob = new Blob([JSON.stringify(backupData)], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `Backup_Kas_${unit}_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.json`; a.click(); Swal.close(); };
+        window.prosesRestore = (input) => { if(!input.files[0]) return; Swal.fire({title: 'Restore Data?', text: 'Data saat ini akan TERTUMPUK oleh data dari file Backup. Lanjutkan?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#16a34a', confirmButtonText: 'Ya, Restore!'}).then((r) => { if(r.isConfirmed) { Swal.fire({title:'Merestore...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()}); const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; const reader = new FileReader(); reader.onload = async (e) => { try { const data = JSON.parse(e.target.result); let updates = {}; if(data.students) updates[`students/${unit}`] = data.students; else updates[`students/${unit}`] = null; if(data.katalog_tagihan) updates[`katalog_tagihan/${unit}`] = data.katalog_tagihan; else updates[`katalog_tagihan/${unit}`] = null; if(data.student_bills) updates[`student_bills/${unit}`] = data.student_bills; else updates[`student_bills/${unit}`] = null; if(data.transactions) updates[`transactions/${unit}`] = data.transactions; else updates[`transactions/${unit}`] = null; await update(ref(db), updates); Swal.fire('Restore Berhasil!', 'Data telah dikembalikan.', 'success'); window.initDash(); } catch(err) { Swal.fire('Gagal!', 'File corrupt atau bukan file backup sistem.', 'error'); } input.value = ''; }; reader.readAsText(input.files[0]); } else { input.value = ''; } }); };
 
         window.addEventListener('DOMContentLoaded', () => { if(localStorage.getItem('sesi_kas_sekolah')) window.initDash(); });
     </script>
