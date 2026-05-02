@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kas Sekolah Terpadu - Final Perfect</title>
+    <title>Sistem Kas Sekolah Terpadu - Masterpiece</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -19,20 +19,38 @@
         
         /* MANAJEMEN MODE PRINT */
         @media print {
+            .no-print { display: none !important; }
+            .print-show { display: block !important; }
+
+            /* 1. KASIR NOTA THERMAL */
             body.print-nota * { visibility: hidden; }
             body.print-nota #area-nota, body.print-nota #area-nota * { visibility: visible; }
             body.print-nota #area-nota { position: absolute; left: 0; top: 0; width: 58mm; padding: 5mm; font-family: monospace; font-size: 12px; color: black; background: white; }
 
-            body.print-bku * { visibility: hidden; }
-            body.print-bku #menu-bku, body.print-bku #menu-bku * { visibility: visible; }
-            body.print-bku #menu-bku { position: absolute; left: 0; top: 0; width: 100%; }
-
+            /* 2. KARTU RIWAYAT A5 */
             body.print-riwayat * { visibility: hidden; }
             body.print-riwayat #area-cetak-riwayat, body.print-riwayat #area-cetak-riwayat * { visibility: visible; }
             body.print-riwayat #area-cetak-riwayat { position: absolute; left: 0; top: 0; width: 148mm; min-height: 210mm; background: white; padding: 8mm; }
 
-            .no-print { display: none !important; }
-            .print-show { display: block !important; }
+            /* 3. BKU MULTI-PAGE SANGAT RAPIH (ANTI TERPOTONG) */
+            body.print-bku { background: white !important; height: auto !important; overflow: visible !important; }
+            body.print-bku section:not(#dashboard-section) { display: none !important; }
+            body.print-bku #sidebar, body.print-bku header, body.print-bku #area-nota, body.print-bku #area-cetak-riwayat { display: none !important; }
+            
+            body.print-bku #dashboard-section, 
+            body.print-bku .flex-1, 
+            body.print-bku main { 
+                display: block !important; height: auto !important; overflow: visible !important; position: static !important; padding: 0 !important; background: white !important;
+            }
+            
+            body.print-bku .view-section { display: none !important; }
+            body.print-bku #menu-bku { display: block !important; border: none !important; box-shadow: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; position: static !important; }
+            
+            /* Trik agar tabel tidak kepotong & Header berulang di page 2 */
+            body.print-bku table { page-break-inside: auto; width: 100%; border-collapse: collapse; }
+            body.print-bku tr { page-break-inside: avoid; page-break-after: auto; }
+            body.print-bku thead { display: table-header-group; }
+            body.print-bku tfoot { display: table-footer-group; }
         }
     </style>
 </head>
@@ -82,11 +100,7 @@
             <form id="form-login" class="space-y-4">
                 <input type="text" id="login-username" placeholder="Username" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
                 <input type="password" id="login-password" placeholder="Password" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                
-                <div class="flex justify-end mt-2">
-                    <button type="button" onclick="window.showLupaPassword()" class="text-sm text-secondary hover:text-primary font-bold transition">Lupa Password?</button>
-                </div>
-
+                <div class="flex justify-end mt-2"><button type="button" onclick="window.showLupaPassword()" class="text-sm text-secondary hover:text-primary font-bold transition">Lupa Password?</button></div>
                 <button type="submit" class="w-full bg-primary hover:bg-blue-900 text-white py-2.5 rounded-lg font-bold transition">Masuk</button>
             </form>
         </div>
@@ -107,7 +121,7 @@
         </aside>
 
         <div class="flex-1 flex flex-col h-screen overflow-hidden">
-            <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6 z-10">
+            <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6 z-10 no-print">
                 <h2 class="font-bold text-lg text-slate-700" id="header-title">Dashboard</h2>
                 <button onclick="window.logout()" class="text-red-500 font-bold text-sm hover:bg-red-50 px-3 py-1 rounded border border-red-100 transition"><i class="fa-solid fa-power-off"></i> Logout</button>
             </header>
@@ -198,7 +212,6 @@
                                     <div><h3 id="kasir-nama-siswa" class="font-bold text-lg text-primary">Nama Siswa</h3><p id="kasir-nis-siswa" class="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-0.5 rounded inline-block mt-1">NIS</p></div>
                                     <div class="flex flex-wrap gap-2 w-full xl:w-auto">
                                         <input type="date" id="kasir-tgl-bayar" title="Tanggal Pembayaran" class="border border-slate-300 p-2 rounded-lg text-sm bg-white outline-none focus:border-primary flex-1 xl:flex-none">
-                                        
                                         <button onclick="window.cetakRiwayatPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-md transition flex-1 xl:flex-none"><i class="fa-solid fa-file-pdf mr-1"></i> Cetak A5</button>
                                         <button onclick="window.prosesBayarTerpilih()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-bold text-sm shadow-md transition flex-1 xl:flex-none"><i class="fa-solid fa-check-double mr-1"></i> Bayar Terpilih</button>
                                     </div>
@@ -236,7 +249,7 @@
                 </div>
 
                 <div id="menu-bku" class="view-section hidden-section bg-white p-6 rounded-xl shadow-sm border print:border-none print:shadow-none print:p-0">
-                    <div class="flex justify-between items-center mb-6 border-b pb-4 print:border-b-2 print:border-black">
+                    <div class="flex justify-between items-center mb-6 border-b pb-4 print:border-b-2 print:border-black print:mb-4">
                         <div>
                             <h2 class="text-2xl font-bold text-gray-800 tracking-wide uppercase print:text-xl">Buku Kas Umum (BKU)</h2>
                             <p class="text-sm text-gray-500 mt-1 print:text-xs">Rekapitulasi Mutasi Kas Berdasarkan Periode</p>
@@ -261,8 +274,8 @@
                         </div>
                     </div>
                     
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left border-collapse print:text-xs">
+                    <div class="overflow-x-auto print:overflow-visible">
+                        <table class="w-full text-sm text-left border-collapse print:text-xs print:w-full">
                             <thead class="bg-gray-100 text-gray-700 print:bg-white print:border-y-2 print:border-black">
                                 <tr><th class="p-3 border border-slate-300">Tanggal</th><th class="p-3 border border-slate-300">Uraian / Keterangan</th><th class="p-3 border border-slate-300 text-right">Pemasukan</th><th class="p-3 border border-slate-300 text-right">Pengeluaran</th><th class="p-3 border border-slate-300 text-right bg-blue-50/50 print:bg-white">Saldo Akumulatif</th></tr>
                             </thead>
@@ -270,7 +283,7 @@
                         </table>
                     </div>
 
-                    <div class="hidden print-show mt-16 flex justify-end">
+                    <div class="hidden print-show mt-12 flex justify-end">
                         <div class="text-center w-48 text-sm">
                             <p>...................., <span id="bku-tgl-cetak"></span></p>
                             <p class="mt-1">Mengetahui,</p>
@@ -282,7 +295,6 @@
 
                 <div id="menu-setting" class="view-section hidden-section">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2"><i class="fa-solid fa-gear text-primary mr-2"></i> Pengaturan Sistem</h2>
-                    
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="bg-white p-5 rounded-xl shadow-sm border">
                             <h3 class="font-bold mb-4 border-b pb-2 text-slate-700"><i class="fa-solid fa-user-shield text-blue-500 mr-2"></i> Ubah Profil & Password</h3>
@@ -374,7 +386,6 @@
         });
         window.logout = () => { Swal.fire({title:'Logout?', icon:'question', showCancelButton:true}).then(r => { if(r.isConfirmed) { localStorage.clear(); window.location.reload(); } }); };
 
-        // TAMBAHAN: FITUR LUPA PASSWORD
         window.showLupaPassword = async () => {
             const { value: u } = await Swal.fire({ title: 'Lupa Password', input: 'text', inputLabel: 'Verifikasi Akun', inputPlaceholder: 'Ketik Username Anda...', showCancelButton: true });
             if (u) {
@@ -386,12 +397,8 @@
                         const { value: nama } = await Swal.fire({ title: 'Verifikasi Keamanan', text: 'Siapa Nama Admin yang terdaftar di akun ini?', input: 'text', inputPlaceholder: 'Ketik Nama Admin...', showCancelButton: true });
                         if(nama && nama.toLowerCase() === data.nama_admin.toLowerCase()) {
                             Swal.fire('Berhasil Verifikasi', `Password akun Anda adalah:<br><br><b class="text-2xl text-blue-600 tracking-wider">${data.password}</b>`, 'success');
-                        } else {
-                            Swal.fire('Gagal', 'Nama Admin tidak cocok / salah!', 'error');
-                        }
-                    } else {
-                        Swal.fire('Gagal', 'Username tidak ditemukan dalam sistem.', 'error');
-                    }
+                        } else { Swal.fire('Gagal', 'Nama Admin tidak cocok / salah!', 'error'); }
+                    } else { Swal.fire('Gagal', 'Username tidak ditemukan dalam sistem.', 'error'); }
                 } catch(e) { Swal.fire('Error', e.message, 'error'); }
             }
         };
@@ -476,8 +483,6 @@
         window.pilihSiswaKasir = async (nis, nama) => {
             document.getElementById('kasir-area-placeholder').classList.add('hidden'); document.getElementById('kasir-area-tagihan').classList.remove('hidden');
             document.getElementById('kasir-nama-siswa').innerText = nama; document.getElementById('kasir-nis-siswa').innerText = nis;
-            
-            // SET DEFAULT TANGGAL BAYAR KASIR KE HARI INI
             document.getElementById('kasir-tgl-bayar').value = new Date().toISOString().split('T')[0];
 
             Swal.fire({title:'Memuat Tagihan...', didOpen:()=>Swal.showLoading()});
@@ -545,14 +550,10 @@
             }); 
         };
 
-        // FUNGSI TRANSAKSI DENGAN PARAMETER TANGGAL KASIR
         async function prosesTransaksi(nis, items, tglBayar) {
             Swal.fire({title:'Memproses...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            
-            // Konversi tanggal terpilih ke ISO string aman (Jam 12 siang)
-            let dObj = tglBayar ? new Date(tglBayar + "T12:00:00") : new Date();
-            if(isNaN(dObj.getTime())) dObj = new Date();
+            let dObj = tglBayar ? new Date(tglBayar + "T12:00:00") : new Date(); if(isNaN(dObj.getTime())) dObj = new Date();
             const dateStrNow = dObj.toISOString(); 
 
             let notaHTML = ''; let totalBayar = 0; const updates = {};
