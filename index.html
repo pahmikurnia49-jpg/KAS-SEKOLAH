@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kas Sekolah Terpadu - Final Build</title>
+    <title>Sistem Kas Sekolah Terpadu - Final Perfect</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -158,7 +158,6 @@
                                 </form>
                                 <ul id="list-katalog" class="mt-4 space-y-2 text-sm max-h-60 overflow-auto border-t pt-4"></ul>
                             </div>
-                            
                             <div class="lg:col-span-2 bg-white p-5 rounded-xl shadow-sm border h-fit">
                                 <h3 class="font-bold mb-4 border-b pb-2 text-slate-700">Terapkan Tagihan ke Siswa</h3>
                                 <div class="space-y-4">
@@ -182,9 +181,7 @@
                                 <input type="text" id="kasir-search" onkeyup="window.renderListSiswaKasir()" class="w-full border p-2 rounded-lg text-sm bg-slate-50" placeholder="Cari Nama/NIS...">
                                 <select id="kasir-filter-kelas" onchange="window.renderListSiswaKasir()" class="w-full border p-2 rounded-lg text-sm bg-slate-50"><option value="">Semua Kelas</option><option value="7">Kelas 7</option><option value="8">Kelas 8</option><option value="9">Kelas 9</option></select>
                             </div>
-                            <div class="flex-1 overflow-auto border rounded-lg">
-                                <ul id="kasir-list-siswa" class="divide-y text-sm"></ul>
-                            </div>
+                            <div class="flex-1 overflow-auto border rounded-lg"><ul id="kasir-list-siswa" class="divide-y text-sm"></ul></div>
                         </div>
 
                         <div class="md:col-span-2">
@@ -375,7 +372,6 @@
             document.getElementById('login-section').classList.add('hidden-section'); document.getElementById('dashboard-section').classList.remove('hidden-section');
             document.getElementById('dash-user-name').innerText = s.nama; document.getElementById('dash-unit').innerText = s.unit;
             document.getElementById('bku-nama-admin').innerText = s.nama; document.getElementById('cetak-riwayat-admin').innerText = s.nama;
-            
             document.getElementById('set-nama').value = s.nama; document.getElementById('set-username').value = s.uid;
 
             let currentYear = new Date().getFullYear(); let yearOptions = '';
@@ -422,9 +418,11 @@
             const target = document.getElementById('pilih-target').value; let targetNisArr = []; 
             if(target === 'KHUSUS') { document.querySelectorAll('.cb-siswa-manual:checked').forEach(e => targetNisArr.push(e.value)); if(targetNisArr.length===0) return Swal.fire('Error','Pilih minimal 1 siswa manual','warning'); } 
             Swal.fire({title:'Menyebar Tagihan...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()}); 
+            
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; 
             const snapSis = await get(child(ref(db), `students/${unit}`)); 
             const snapBills = await get(child(ref(db), `student_bills/${unit}`)); const existingBills = snapBills.val() || {};
+
             let countBerhasil = 0; let countDilewati = 0;
             if(snapSis.exists()) { 
                 const updates = {}; 
@@ -457,8 +455,6 @@
             if(snap.exists()) {
                 snap.forEach(c => {
                     let b = c.val();
-                    
-                    // PERBAIKAN: Set Data Atribut terbayar untuk Kalkulasi Pemasukan Selanjutnya
                     let trb = b.terbayar || 0; 
                     let tglText = b.tgl_bayar ? new Date(b.tgl_bayar).toLocaleDateString('id-ID') : '-';
 
@@ -468,7 +464,6 @@
                         h += `<tr class="bg-slate-50"><td class="p-3"></td><td class="p-3 text-gray-500">${b.nama_tagihan}</td><td class="p-3 text-gray-400">${window.formatRp(b.total)}</td><td class="p-3 text-gray-400">Rp 0</td><td class="p-3"><span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded font-bold">LUNAS</span></td><td class="p-3 text-center"><button onclick="window.batalBayar('${nis}','${b.id}',${b.total})" class="text-[10px] text-red-400 hover:text-red-600 font-bold underline">Batalkan</button></td></tr>`;
                     }
 
-                    // PERBAIKAN: Ada Kolom Tgl Bayar di Kartu A5
                     let cetakWarna = b.status === 'LUNAS' ? 'text-green-700' : (b.status === 'BELUM' ? 'text-red-600' : 'text-yellow-600');
                     hCetak += `<tr><td class="p-1.5 border border-black text-center">${tglText}</td><td class="p-1.5 border border-black truncate max-w-[120px]">${b.nama_tagihan}</td><td class="p-1.5 border border-black text-right">${window.formatRp(b.total)}</td><td class="p-1.5 border border-black text-right">${window.formatRp(trb)}</td><td class="p-1.5 border border-black text-right font-bold">${window.formatRp(b.sisa)}</td><td class="p-1.5 border border-black text-center font-bold ${cetakWarna}">${b.status}</td></tr>`;
                 });
@@ -487,27 +482,28 @@
         };
 
         window.checkAllKasir = (el) => { document.querySelectorAll('.cb-bayar').forEach(c => c.checked = el.checked); };
-        window.bayarCustom = async (nis, bId, bNama, bSisa, bKatId, bTerbayar) => { const { value: nominal } = await Swal.fire({ title: `Bayar Sebagian`, text: `${bNama} (Sisa: Rp ${bSisa})`, input: 'number', inputPlaceholder: 'Ketik nominal uang...', showCancelButton: true, confirmButtonText: 'Proses' }); if(nominal) { let bayar = parseInt(nominal); if(bayar > bSisa) return Swal.fire('Error','Nominal melebihi sisa tagihan!','error'); if(bayar <= 0) return Swal.fire('Error','Nominal tidak valid','error'); await prosesTransaksi(nis, [{id:bId, nama:bNama, bayar:bayar, sisa_lama:bSisa, id_kat:bKatId, terbayar_lama:bTerbayar}]); } };
-        window.prosesBayarTerpilih = async () => { let cbs = document.querySelectorAll('.cb-bayar:checked'); if(cbs.length===0) return Swal.fire('Oops','Pilih dulu tagihan yang mau dibayar dengan mencentang kotak di tabel.','warning'); let nis = document.getElementById('kasir-nis-siswa').innerText; let items = []; let total = 0; let nms = []; cbs.forEach(c => { items.push({id: c.value, nama: c.dataset.nama, bayar: parseInt(c.dataset.sisa), sisa_lama: parseInt(c.dataset.sisa), id_kat: c.dataset.kat, terbayar_lama: parseInt(c.dataset.terbayar)}); total += parseInt(c.dataset.sisa); nms.push(c.dataset.nama); }); Swal.fire({ title: 'Konfirmasi Pembayaran', html: `Bayar LUNAS tagihan berikut:<br><b class="text-sm text-primary">${nms.join(', ')}</b><br><br>Total: <b class="text-xl text-green-600">${window.formatRp(total)}</b>`, icon: 'question', showCancelButton: true, confirmButtonColor: '#16a34a', confirmButtonText: 'Ya, Bayar Lunas!' }).then(async (r) => { if(r.isConfirmed) await prosesTransaksi(nis, items); }); };
+        window.bayarCustom = async (nis, bId, bNama, bSisa, bKatId, bTerbayar) => { const { value: nominal } = await Swal.fire({ title: `Bayar Sebagian`, text: `${bNama} (Sisa: Rp ${bSisa})`, input: 'number', inputPlaceholder: 'Ketik nominal uang...', showCancelButton: true, confirmButtonText: 'Proses' }); if(nominal) { let bayar = parseInt(nominal); if(bayar > bSisa) return Swal.fire('Error','Nominal melebihi sisa tagihan!','error'); if(bayar <= 0) return Swal.fire('Error','Nominal tidak valid','error'); await prosesTransaksi(nis, [{id:bId, nama:bNama, bayar:bayar, sisa_lama:parseInt(bSisa), id_kat:bKatId, terbayar_lama:parseInt(bTerbayar)}]); } };
+        window.prosesBayarTerpilih = async () => { let cbs = document.querySelectorAll('.cb-bayar:checked'); if(cbs.length===0) return Swal.fire('Oops','Pilih dulu tagihan yang mau dibayar.','warning'); let nis = document.getElementById('kasir-nis-siswa').innerText; let items = []; let total = 0; let nms = []; cbs.forEach(c => { items.push({id: c.value, nama: c.dataset.nama, bayar: parseInt(c.dataset.sisa), sisa_lama: parseInt(c.dataset.sisa), id_kat: c.dataset.kat, terbayar_lama: parseInt(c.dataset.terbayar)}); total += parseInt(c.dataset.sisa); nms.push(c.dataset.nama); }); Swal.fire({ title: 'Konfirmasi Pembayaran', html: `Bayar LUNAS tagihan berikut:<br><b class="text-sm text-primary">${nms.join(', ')}</b><br><br>Total: <b class="text-xl text-green-600">${window.formatRp(total)}</b>`, icon: 'question', showCancelButton: true, confirmButtonColor: '#16a34a', confirmButtonText: 'Ya, Bayar Lunas!' }).then(async (r) => { if(r.isConfirmed) await prosesTransaksi(nis, items); }); };
 
+        // PERBAIKAN BKU: PEMASUKAN MULTIPEL & NAMA SISWA 100% MASUK
         async function prosesTransaksi(nis, items) {
             Swal.fire({title:'Memproses...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            const dateStrNow = new Date().toISOString(); let notaHTML = ''; let totalBayar = 0; const updates = {};
+            const dateStrNow = new Date().toISOString(); 
+            let notaHTML = ''; let totalBayar = 0; const updates = {};
             const namaSiswa = document.getElementById('kasir-nama-siswa').innerText;
             
             items.forEach(it => {
                 let sisaBaru = it.sisa_lama - it.bayar;
-                // PERBAIKAN: Uang ditambahkan/diakumulasi ke terbayar_lama
                 let terbayarBaru = it.terbayar_lama + it.bayar; 
                 
                 updates[`student_bills/${unit}/${nis}/${it.id}/terbayar`] = terbayarBaru; 
                 updates[`student_bills/${unit}/${nis}/${it.id}/sisa`] = sisaBaru;
                 updates[`student_bills/${unit}/${nis}/${it.id}/status`] = sisaBaru <= 0 ? 'LUNAS' : 'SEBAGIAN';
-                // SIMPAN TANGGAL BAYAR TERAKHIR
                 updates[`student_bills/${unit}/${nis}/${it.id}/tgl_bayar`] = dateStrNow;
                 
-                let idTrx = push(child(ref(db), `transactions/${unit}`)).key; 
+                // MENCATAT PEMASUKAN KE DATABASE
+                let idTrx = push(ref(db, `transactions/${unit}`)).key; 
                 updates[`transactions/${unit}/${idTrx}`] = { 
                     id: idTrx, tipe: 'IN', dompet: it.id_kat, nama_dompet: it.nama, 
                     tanggal: dateStrNow, uraian: `Terima ${it.nama} - ${namaSiswa} (${nis})`, nominal: it.bayar 
@@ -537,9 +533,7 @@
             if(snapTrx.exists()){
                 snapTrx.forEach(c => {
                     let t = c.val(); 
-                    // PROTEKSI TANGGAL (Jika Invalid Data Lama)
                     let tTgl = new Date(t.tanggal); if(isNaN(tTgl.getTime())) tTgl = new Date();
-                    
                     if(t.tipe==='IN'){ totIn+=t.nominal; if(tTgl.getMonth() === blnSkrg && tTgl.getFullYear() === thnSkrg) inBulan += t.nominal; if(dompets[t.dompet]) dompets[t.dompet].saldo += t.nominal; }
                     if(t.tipe==='OUT'){ totOut+=t.nominal; if(tTgl.getMonth() === blnSkrg && tTgl.getFullYear() === thnSkrg) outBulan += t.nominal; if(dompets[t.dompet]) dompets[t.dompet].saldo -= t.nominal; arrOut.push(t); }
                 });
@@ -552,16 +546,23 @@
             document.getElementById('out-dompet').innerHTML = optDompet; document.getElementById('grid-dompet').innerHTML = gridHtml;
         };
 
+        // PERBAIKAN: FORMAT TANGGAL PENGELUARAN 100% ANTI INVALID DATE
         window.simpanPengeluaran = async (e) => { 
             e.preventDefault(); 
             const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; 
-            let elDompet = document.getElementById('out-dompet'); let idDompet = elDompet.value; let optDipilih = elDompet.options[elDompet.selectedIndex]; let saldoTersedia = parseInt(optDipilih.dataset.saldo); let nmDompet = optDipilih.text.split(' (')[0]; 
+            let elDompet = document.getElementById('out-dompet'); 
+            if(!elDompet.value) return Swal.fire('Oops', 'Pilih dompet terlebih dahulu!', 'error');
+            
+            let idDompet = elDompet.value; let optDipilih = elDompet.options[elDompet.selectedIndex]; let saldoTersedia = parseInt(optDipilih.dataset.saldo) || 0; let nmDompet = optDipilih.text.split(' (')[0]; 
             
             let tglInput = document.getElementById('out-tanggal').value; 
-            // PERBAIKAN: Parsing tanggal 100% aman (UTC)
-            let tglSimpan = new Date(tglInput).toISOString(); 
+            let dObj = tglInput ? new Date(tglInput) : new Date();
+            if(isNaN(dObj.getTime())) dObj = new Date();
+            let tglSimpan = dObj.toISOString(); 
             
-            let ur = document.getElementById('out-uraian').value; let nom = parseInt(document.getElementById('out-nominal').value); 
+            let ur = document.getElementById('out-uraian').value; 
+            let nom = parseInt(document.getElementById('out-nominal').value); 
+            if(isNaN(nom) || nom <= 0) return Swal.fire('Error', 'Nominal tidak valid!', 'error');
             if(nom > saldoTersedia) { return Swal.fire({ title: 'Saldo Tidak Cukup!', text: `Gagal! Dompet ini hanya bersaldo Rp ${saldoTersedia.toLocaleString('id-ID')}.`, icon: 'error' }); } 
             
             Swal.fire({title:'Menyimpan...', didOpen:()=>Swal.showLoading()}); 
@@ -572,62 +573,73 @@
         };
         window.hapusTransaksi = (idTrx) => { Swal.fire({title: 'Hapus Transaksi?', text: 'Saldo akan disesuaikan.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'}).then(async (r) => { if(r.isConfirmed) { const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit; await set(ref(db, `transactions/${unit}/${idTrx}`), null); window.renderStatistik(); window.renderBKU(); } }); };
 
-        // --- BUKU KAS UMUM (DENGAN TANGGAL AMAN) ---
+        // --- BUKU KAS UMUM (DIPERKUAT SYSTEM SORT & FILTER) ---
         window.renderBKU = async () => {
-            const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
-            const snap = await get(child(ref(db), `transactions/${unit}`));
-            
-            const blnFilterVal = document.getElementById('bku-bulan').value;
-            const fltBln = blnFilterVal === 'all' ? -1 : parseInt(blnFilterVal); 
-            const fltThn = parseInt(document.getElementById('bku-tahun').value);
-
-            let h = ''; let saldo = 0; let saldoAwal = 0;
-            let totInBulan = 0, totOutBulan = 0;
-
-            if(snap.exists()) {
-                let arr = []; snap.forEach(c => arr.push(c.val()));
-                arr.sort((a,b)=>new Date(a.tanggal)-new Date(b.tanggal));
+            try {
+                const unit = JSON.parse(localStorage.getItem('sesi_kas_sekolah')).unit;
+                const snap = await get(ref(db, `transactions/${unit}`));
                 
-                let filteredArr = [];
+                const blnFilterVal = document.getElementById('bku-bulan').value;
+                const fltBln = blnFilterVal === 'all' ? -1 : parseInt(blnFilterVal); 
+                const fltThn = parseInt(document.getElementById('bku-tahun').value) || new Date().getFullYear();
 
-                arr.forEach(d => {
-                    let m = parseInt(d.nominal) || 0; 
-                    let k = 0;
-                    if(d.tipe === 'OUT') { k = m; m = 0; }
+                let h = ''; let saldo = 0; let saldoAwal = 0;
+                let totInBulan = 0, totOutBulan = 0;
+
+                if(snap.exists()) {
+                    let arr = []; 
+                    snap.forEach(c => arr.push(c.val()));
                     
-                    // FALLBACK AMAN
-                    let tTgl = new Date(d.tanggal); if(isNaN(tTgl.getTime())) tTgl = new Date();
-                    
-                    let tBln = tTgl.getMonth() + 1; // 1 to 12
-                    let tThn = tTgl.getFullYear();
-
-                    if (tThn < fltThn || (tThn === fltThn && fltBln !== -1 && tBln < fltBln)) {
-                        saldoAwal += (m - k);
-                        saldo += (m - k);
-                    } else if (tThn === fltThn && (fltBln === -1 || tBln === fltBln)) {
-                        saldo += (m - k);
-                        totInBulan += m; totOutBulan += k;
-                        filteredArr.push({...d, currentSaldo: saldo, safeDate: tTgl});
-                    }
-                });
-
-                if (saldoAwal !== 0 || fltBln !== -1) {
-                    h += `<tr class="bg-yellow-50 font-bold text-slate-700"><td colspan="2" class="p-3 border border-slate-300 text-center tracking-widest">SALDO AWAL</td><td class="p-3 border border-slate-300 text-right">-</td><td class="p-3 border border-slate-300 text-right">-</td><td class="p-3 border border-slate-300 text-right text-blue-900">${window.formatRp(saldoAwal)}</td></tr>`;
-                }
-
-                if(filteredArr.length === 0) {
-                    h += `<tr><td colspan="5" class="p-6 text-center text-gray-400">Tidak ada transaksi di periode terpilih.</td></tr>`;
-                } else {
-                    filteredArr.forEach(d => {
-                        let m = d.tipe==='IN'?d.nominal:0; let k = d.tipe==='OUT'?d.nominal:0;
-                        h += `<tr class="hover:bg-slate-50"><td class="p-3 border border-slate-300 whitespace-nowrap">${d.safeDate.toLocaleDateString('id-ID')}</td><td class="p-3 border border-slate-300">${d.uraian} <br><span class="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold inline-block mt-1">Dompet: ${d.nama_dompet||'Umum'}</span></td><td class="p-3 border border-slate-300 text-right font-mono text-green-700">${m>0?window.formatRp(m):'-'}</td><td class="p-3 border border-slate-300 text-right font-mono text-red-700">${k>0?window.formatRp(k):'-'}</td><td class="p-3 border border-slate-300 text-right font-mono font-black text-blue-900 bg-blue-50/30 print:bg-white">${window.formatRp(d.currentSaldo)}</td></tr>`;
+                    // Sort super aman, no NaN allowed
+                    arr.sort((a,b) => {
+                        let tA = new Date(a.tanggal).getTime(); let tB = new Date(b.tanggal).getTime();
+                        return (isNaN(tA) ? 0 : tA) - (isNaN(tB) ? 0 : tB);
                     });
-                }
-                h += `<tr class="bg-slate-200 font-bold text-slate-800"><td colspan="2" class="p-3 border border-slate-300 text-center uppercase">Total Mutasi & Saldo Akhir Periode</td><td class="p-3 border border-slate-300 text-right text-green-700">${window.formatRp(totInBulan)}</td><td class="p-3 border border-slate-300 text-right text-red-700">${window.formatRp(totOutBulan)}</td><td class="p-3 border border-slate-300 text-right text-blue-900">${window.formatRp(saldo)}</td></tr>`;
+                    
+                    let filteredArr = [];
 
-            } else { h = '<tr><td colspan="5" class="p-6 text-center text-gray-400">Belum ada mutasi kas.</td></tr>'; }
-            
-            document.getElementById('table-bku').innerHTML = h;
+                    arr.forEach(d => {
+                        let m = d.tipe === 'IN' ? (parseInt(d.nominal) || 0) : 0;
+                        let k = d.tipe === 'OUT' ? (parseInt(d.nominal) || 0) : 0;
+                        
+                        let tTgl = new Date(d.tanggal); 
+                        if(isNaN(tTgl.getTime())) tTgl = new Date();
+                        
+                        let tBln = tTgl.getMonth() + 1;
+                        let tThn = tTgl.getFullYear();
+
+                        if (tThn < fltThn || (tThn === fltThn && fltBln !== -1 && tBln < fltBln)) {
+                            saldoAwal += (m - k);
+                            saldo += (m - k);
+                        } else if (tThn === fltThn && (fltBln === -1 || tBln === fltBln)) {
+                            saldo += (m - k);
+                            totInBulan += m; totOutBulan += k;
+                            filteredArr.push({...d, currentSaldo: saldo, safeDate: tTgl});
+                        }
+                    });
+
+                    if (saldoAwal !== 0 || fltBln !== -1) {
+                        h += `<tr class="bg-yellow-50 font-bold text-slate-700"><td colspan="2" class="p-3 border border-slate-300 text-center tracking-widest">SALDO AWAL</td><td class="p-3 border border-slate-300 text-right">-</td><td class="p-3 border border-slate-300 text-right">-</td><td class="p-3 border border-slate-300 text-right text-blue-900">${window.formatRp(saldoAwal)}</td></tr>`;
+                    }
+
+                    if(filteredArr.length === 0) {
+                        h += `<tr><td colspan="5" class="p-6 text-center text-gray-400">Tidak ada mutasi di periode terpilih.</td></tr>`;
+                    } else {
+                        filteredArr.forEach(d => {
+                            let m = d.tipe==='IN' ? (parseInt(d.nominal) || 0) : 0; 
+                            let k = d.tipe==='OUT' ? (parseInt(d.nominal) || 0) : 0;
+                            h += `<tr class="hover:bg-slate-50"><td class="p-3 border border-slate-300 whitespace-nowrap">${d.safeDate.toLocaleDateString('id-ID')}</td><td class="p-3 border border-slate-300">${d.uraian} <br><span class="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold inline-block mt-1">Dompet: ${d.nama_dompet||'Umum'}</span></td><td class="p-3 border border-slate-300 text-right font-mono text-green-700">${m>0?window.formatRp(m):'-'}</td><td class="p-3 border border-slate-300 text-right font-mono text-red-700">${k>0?window.formatRp(k):'-'}</td><td class="p-3 border border-slate-300 text-right font-mono font-black text-blue-900 bg-blue-50/30 print:bg-white">${window.formatRp(d.currentSaldo)}</td></tr>`;
+                        });
+                    }
+                    h += `<tr class="bg-slate-200 font-bold text-slate-800"><td colspan="2" class="p-3 border border-slate-300 text-center uppercase">Total Mutasi & Saldo Akhir Periode</td><td class="p-3 border border-slate-300 text-right text-green-700">${window.formatRp(totInBulan)}</td><td class="p-3 border border-slate-300 text-right text-red-700">${window.formatRp(totOutBulan)}</td><td class="p-3 border border-slate-300 text-right text-blue-900">${window.formatRp(saldo)}</td></tr>`;
+
+                } else { h = '<tr><td colspan="5" class="p-6 text-center text-gray-400">Belum ada mutasi kas.</td></tr>'; }
+                
+                document.getElementById('table-bku').innerHTML = h;
+            } catch (e) {
+                console.error("Error BKU:", e);
+                document.getElementById('table-bku').innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-500">Terjadi kesalahan pada sistem BKU.</td></tr>';
+            }
         };
 
         window.cetakBKU = () => { document.getElementById('bku-tgl-cetak').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}); document.body.className = 'print-bku bg-white'; window.print(); document.body.className = 'bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col'; };
